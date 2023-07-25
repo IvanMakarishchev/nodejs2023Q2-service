@@ -70,6 +70,8 @@ describe('Users (e2e)', () => {
         .delete(usersRoutes.delete(id))
         .set(commonHeaders);
 
+      console.log(cleanupResponse.statusCode);
+
       expect(cleanupResponse.statusCode).toBe(StatusCodes.NO_CONTENT);
     });
 
