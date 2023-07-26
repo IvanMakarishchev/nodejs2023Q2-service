@@ -1,14 +1,11 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import {
-  CreateUserDto,
   DataBase,
+  Track,
   UpdatePasswordDto,
   User,
 } from '../interfaces/interfaces';
-import { randomUUID } from 'crypto';
 import { BASIC_DATABASE } from '../constants';
-import { isUUID } from 'class-validator';
-import { isCreateUserData, isUpdateUserData, statusResponse } from '../utils';
 
 @Injectable()
 export class DataService {
@@ -53,17 +50,50 @@ export class DataService {
     const userIndex = this.dataBase.users.findIndex((user) => user.id === id);
     this.dataBase.users[userIndex] = userUpdatedData;
     const { password, ...resData } = userUpdatedData;
-    console.log(resData);
+    // console.log(resData);
     return resData;
   }
 
   deleteUser(id: string) {
     const user = this.getUserById(id);
-    if (user) {
-      this.dataBase.users = this.dataBase.users.filter(
-        (user) => user.id !== id,
-      );
-    }
-    return user ? user : false;
+    if (!user) return false;
+    this.dataBase.users = this.dataBase.users.filter((user) => user.id !== id);
+    return user;
+  }
+
+  createTrack(dto: Track) {
+    this.dataBase.tracks.push(dto);
+    console.log(this.dataBase.tracks);
+    return dto;
+  }
+
+  getAllTracks() {
+    // console.log(this.dataBase.tracks);
+    return this.dataBase.tracks;
+  }
+
+  getTrack(id: string) {
+    const track = this.dataBase.tracks.find((track) => track.id === id);
+    return track ? track : false;
+  }
+
+  updateTrack(id: string, updateTrackDto: Track) {
+    const track = this.getTrack(id);
+    if (!track) return false;
+    const trackIndex = this.dataBase.tracks.findIndex(
+      (track) => track.id === id,
+    );
+    this.dataBase.tracks[trackIndex] = {
+      ...track,
+      ...updateTrackDto,
+    };
+    return this.dataBase.tracks[trackIndex];
+  }
+
+  deleteTrack(id: string) {
+    const track = this.getTrack(id);
+    if (!track) return false;
+    this.dataBase.tracks.filter((track) => track.id !== id);
+    return track;
   }
 }

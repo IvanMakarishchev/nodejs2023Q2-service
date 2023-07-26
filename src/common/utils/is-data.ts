@@ -15,3 +15,16 @@ export const isUpdateUserData = (obj: any): boolean => {
     typeof obj.newPassword === 'string'
   );
 };
+
+export const isTrackData = (obj: any): boolean => {
+  return (
+    'name' in obj &&
+    'artistId' in obj &&
+    'albumId' in obj &&
+    'duration' in obj &&
+    typeof obj.name === 'string' &&
+    (typeof obj.artistId === 'string' || obj.artistId === null) &&
+    (typeof obj.albumId === 'string' || obj.albumId === null) &&
+    typeof obj.duration === 'number'
+  );
+};
