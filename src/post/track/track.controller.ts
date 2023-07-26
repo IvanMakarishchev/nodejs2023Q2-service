@@ -45,7 +45,7 @@ export class TrackController {
         trackResponse.error,
       );
     }
-    return;
+    return trackResponse;
   }
 
   @Put(':id')

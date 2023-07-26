@@ -98,7 +98,6 @@ export class DataService {
   }
 
   createArtist(dto: Artist) {
-    console.log(dto);
     this.dataBase.artists.push(dto);
     return dto;
   }
@@ -108,7 +107,6 @@ export class DataService {
   }
 
   getArtist(id: string) {
-    console.log(this.getAllArtists());
     const artist = this.dataBase.artists.find((artist) => artist.id === id);
     return artist ? artist : false;
   }
@@ -129,6 +127,12 @@ export class DataService {
   deleteArtist(id: string) {
     const artist = this.getArtist(id);
     if (!artist) return false;
+    this.dataBase.tracks = this.dataBase.tracks.map((track) => {
+      return {
+        ...track,
+        artistId: track.artistId === id ? null : track.artistId,
+      };
+    });
     this.dataBase.artists = this.dataBase.artists.filter(
       (artist) => artist.id !== id,
     );

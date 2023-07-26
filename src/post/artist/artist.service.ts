@@ -9,7 +9,6 @@ import { isUUID } from 'class-validator';
 export class ArtistService {
   constructor(private dataService: DataService) {}
   create(createArtistDto: Artist) {
-    console.log(createArtistDto);
     if (!isArtistData(createArtistDto))
       return statusResponse(HttpStatus.BAD_REQUEST);
     const dto = {
