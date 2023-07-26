@@ -4,4 +4,5 @@ export {
   isUpdateUserData,
   isTrackData,
   isArtistData,
+  isAlbumData,
 } from './is-data';

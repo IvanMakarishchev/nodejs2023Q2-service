@@ -37,3 +37,14 @@ export const isArtistData = (obj: any): boolean => {
     typeof obj.grammy === 'boolean'
   );
 };
+
+export const isAlbumData = (obj: any): boolean => {
+  return (
+    'name' in obj &&
+    'year' in obj &&
+    'artistId' in obj &&
+    typeof obj.name === 'string' &&
+    typeof obj.year === 'number' &&
+    (typeof obj.artistId === 'string' || obj.artistId === null)
+  );
+};

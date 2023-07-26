@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import {
+  Album,
   Artist,
   DataBase,
   Track,
@@ -37,14 +38,14 @@ export class DataService {
     return safeData;
   }
 
-  updateUser(id: string, updatePasswordDto: UpdatePasswordDto) {
+  updateUser(id: string, dto: UpdatePasswordDto) {
     const user = this.getUserById(id);
     if (!user) return false;
     const { password: pas, ...safeData } = user;
-    if (pas !== updatePasswordDto.oldPassword) return null;
+    if (pas !== dto.oldPassword) return null;
     const userUpdatedData: User = {
       ...safeData,
-      password: updatePasswordDto.newPassword,
+      password: dto.newPassword,
       version: safeData.version + 1,
       updatedAt: Date.now(),
     };
@@ -75,7 +76,7 @@ export class DataService {
     return track ? track : false;
   }
 
-  updateTrack(id: string, updateTrackDto: Track) {
+  updateTrack(id: string, dto: Track) {
     const track = this.getTrack(id);
     if (!track) return false;
     const trackIndex = this.dataBase.tracks.findIndex(
@@ -83,7 +84,7 @@ export class DataService {
     );
     this.dataBase.tracks[trackIndex] = {
       ...track,
-      ...updateTrackDto,
+      ...dto,
     };
     return this.dataBase.tracks[trackIndex];
   }
@@ -111,7 +112,7 @@ export class DataService {
     return artist ? artist : false;
   }
 
-  updateArtist(id: string, updateArtistDto: Artist) {
+  updateArtist(id: string, dto: Artist) {
     const artist = this.getArtist(id);
     if (!artist) return false;
     const artistIndex = this.dataBase.artists.findIndex(
@@ -119,7 +120,7 @@ export class DataService {
     );
     this.dataBase.artists[artistIndex] = {
       ...artist,
-      ...updateArtistDto,
+      ...dto,
     };
     return this.dataBase.artists[artistIndex];
   }
@@ -137,5 +138,47 @@ export class DataService {
       (artist) => artist.id !== id,
     );
     return artist;
+  }
+
+  createAlbum(dto: Album) {
+    this.dataBase.albums.push(dto);
+    return dto;
+  }
+
+  getAllAlbums() {
+    return this.dataBase.albums;
+  }
+
+  getAlbum(id: string) {
+    const album = this.dataBase.albums.find((album) => album.id === id);
+    return album ? album : false;
+  }
+
+  updateAlbum(id: string, dto: Album) {
+    const album = this.getAlbum(id);
+    if (!album) return false;
+    const albumIndex = this.dataBase.albums.findIndex(
+      (album) => album.id === id,
+    );
+    this.dataBase.albums[albumIndex] = {
+      ...album,
+      ...dto,
+    };
+    return this.dataBase.albums[albumIndex];
+  }
+
+  deleteAlbum(id: string) {
+    const album = this.getAlbum(id);
+    if (!album) return false;
+    this.dataBase.tracks = this.dataBase.tracks.map((track) => {
+      return {
+        ...track,
+        albumId: track.albumId === id ? null : track.albumId,
+      };
+    });
+    this.dataBase.albums = this.dataBase.albums.filter(
+      (album) => album.id !== id,
+    );
+    return album;
   }
 }

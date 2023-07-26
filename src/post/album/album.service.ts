@@ -1,26 +1,44 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAlbumDto } from './dto/create-album.dto';
-import { UpdateAlbumDto } from './dto/update-album.dto';
+import { HttpStatus, Injectable } from '@nestjs/common';
+import { isUUID } from 'class-validator';
+import { randomUUID } from 'crypto';
+import { Album } from 'src/common/interfaces';
+import { DataService } from 'src/common/services';
+import { isAlbumData, statusResponse } from 'src/common/utils';
 
 @Injectable()
 export class AlbumService {
-  create(createAlbumDto: CreateAlbumDto) {
-    return 'This action adds a new album';
+  constructor(private dataService: DataService) {}
+  create(createAlbumDto: Album) {
+    if (!isAlbumData(createAlbumDto))
+      return statusResponse(HttpStatus.BAD_REQUEST);
+    const dto = {
+      id: randomUUID({ disableEntropyCache: true }),
+      ...createAlbumDto,
+    };
+    return this.dataService.createAlbum(dto);
   }
 
   findAll() {
-    return `This action returns all album`;
+    return this.dataService.getAllAlbums();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} album`;
+  findOne(id: string) {
+    if (!isUUID(id, '4')) return statusResponse(HttpStatus.BAD_REQUEST);
+    const album = this.dataService.getAlbum(id);
+    return album ? album : statusResponse(HttpStatus.NOT_FOUND);
   }
 
-  update(id: number, updateAlbumDto: UpdateAlbumDto) {
-    return `This action updates a #${id} album`;
+  update(id: string, updateAlbumDto: Album) {
+    if (!isUUID(id, '4')) return statusResponse(HttpStatus.BAD_REQUEST);
+    if (!isAlbumData(updateAlbumDto))
+      return statusResponse(HttpStatus.BAD_REQUEST);
+    const album = this.dataService.updateAlbum(id, updateAlbumDto);
+    return album ? album : statusResponse(HttpStatus.NOT_FOUND);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} album`;
+  remove(id: string) {
+    if (!isUUID(id, '4')) return statusResponse(HttpStatus.BAD_REQUEST);
+    const album = this.dataService.deleteAlbum(id);
+    return album ? album : statusResponse(HttpStatus.NOT_FOUND);
   }
 }
