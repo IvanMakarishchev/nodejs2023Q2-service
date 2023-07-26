@@ -14,57 +14,56 @@ import { isCreateUserData, isUpdateUserData, statusResponse } from '../utils';
 export class DataService {
   private dataBase: DataBase = BASIC_DATABASE;
 
-  createUser(createUserDto: CreateUserDto) {
-    if (!isCreateUserData(createUserDto)) {
-      return statusResponse(HttpStatus.BAD_REQUEST);
-    }
-    const dto = {
-      id: randomUUID({ disableEntropyCache: true }),
-      version: 1,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-      login: createUserDto.login,
-      password: createUserDto.password,
-    };
+  getUserById(id: string) {
+    return this.dataBase.users.find((user) => user.id === id);
+  }
+
+  createUser(dto: User) {
     this.dataBase.users.push(dto);
-    const { password, ...resData } = dto;
-    return resData;
+    const { password, ...safeData } = dto;
+    return safeData;
   }
 
   getAllUsers() {
-    return this.dataBase.users;
+    const res = this.dataBase.users.map((user) => {
+      const { password, ...safeData } = user;
+      return safeData;
+    });
+    return res;
   }
 
   getUser(id: string) {
-    if (!isUUID(id, '4')) return statusResponse(HttpStatus.BAD_REQUEST);
-    const user = this.dataBase.users.find((user) => user.id === id);
-    return user ? user : statusResponse(HttpStatus.NOT_FOUND);
+    const user = this.getUserById(id);
+    if (!user) return false;
+    const { password, ...safeData } = user;
+    return safeData;
   }
 
   updateUser(id: string, updatePasswordDto: UpdatePasswordDto) {
-    if (!isUpdateUserData(updatePasswordDto)) {
-      return statusResponse(HttpStatus.BAD_REQUEST);
-    }
-    const userData = this.getUser(id);
-    if ('error' in userData) return userData;
-    if (userData.password !== updatePasswordDto.oldPassword)
-      return statusResponse(HttpStatus.FORBIDDEN);
+    const user = this.getUserById(id);
+    if (!user) return false;
+    const { password: pas, ...safeData } = user;
+    if (pas !== updatePasswordDto.oldPassword) return null;
     const userUpdatedData: User = {
-      ...userData,
+      ...safeData,
       password: updatePasswordDto.newPassword,
-      version: userData.version + 1,
+      version: safeData.version + 1,
       updatedAt: Date.now(),
     };
     const userIndex = this.dataBase.users.findIndex((user) => user.id === id);
     this.dataBase.users[userIndex] = userUpdatedData;
     const { password, ...resData } = userUpdatedData;
+    console.log(resData);
     return resData;
   }
 
   deleteUser(id: string) {
-    const userData = this.getUser(id);
-    if ('error' in userData) return userData;
-    this.dataBase.users = this.dataBase.users.filter((user) => user.id !== id);
-    return userData;
+    const user = this.getUserById(id);
+    if (user) {
+      this.dataBase.users = this.dataBase.users.filter(
+        (user) => user.id !== id,
+      );
+    }
+    return user ? user : false;
   }
 }
