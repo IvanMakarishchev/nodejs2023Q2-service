@@ -24,13 +24,11 @@ export class DataService {
       createdAt: Date.now(),
       updatedAt: Date.now(),
       login: createUserDto.login,
-      auth: {
-        oldPassword: null,
-        newPassword: createUserDto.password,
-      },
+      password: createUserDto.password,
     };
     this.dataBase.users.push(dto);
-    return dto;
+    const { password, ...resData } = dto;
+    return resData;
   }
 
   getAllUsers() {
@@ -49,20 +47,18 @@ export class DataService {
     }
     const userData = this.getUser(id);
     if ('error' in userData) return userData;
-    if (userData.auth.newPassword !== updatePasswordDto.oldPassword)
+    if (userData.password !== updatePasswordDto.oldPassword)
       return statusResponse(HttpStatus.FORBIDDEN);
     const userUpdatedData: User = {
       ...userData,
-      auth: {
-        oldPassword: userData.auth.newPassword,
-        newPassword: updatePasswordDto.newPassword,
-      },
+      password: updatePasswordDto.newPassword,
       version: userData.version + 1,
       updatedAt: Date.now(),
     };
     const userIndex = this.dataBase.users.findIndex((user) => user.id === id);
     this.dataBase.users[userIndex] = userUpdatedData;
-    return userUpdatedData;
+    const { password, ...resData } = userUpdatedData;
+    return resData;
   }
 
   deleteUser(id: string) {
