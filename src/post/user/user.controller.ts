@@ -3,16 +3,15 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   HttpException,
   HttpStatus,
-  HttpCode,
   Res,
+  Put,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { UpdatePasswordDto, User } from 'src/common/interfaces';
+import { CreateUserDto, UpdatePasswordDto } from 'src/common/interfaces';
 import { HTTP_MESSAGES } from 'src/common/constants';
 import { Response } from 'express';
 
@@ -21,8 +20,15 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  create(@Body() userData: User) {
-    return this.userService.create(userData);
+  create(@Body() userData: CreateUserDto) {
+    const createResponse = this.userService.create(userData);
+    if ('error' in createResponse) {
+      throw new HttpException(
+        HTTP_MESSAGES[createResponse.error],
+        createResponse.error,
+      );
+    }
+    return createResponse;
   }
 
   @Get()
@@ -34,7 +40,6 @@ export class UserController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     const userResponse = this.userService.findOne(id);
-    console.log('USER: ', userResponse);
     if ('error' in userResponse) {
       throw new HttpException(
         HTTP_MESSAGES[userResponse.error],
@@ -44,9 +49,16 @@ export class UserController {
     return userResponse;
   }
 
-  @Patch(':id')
+  @Put(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdatePasswordDto) {
-    return this.userService.update(id, updateUserDto);
+    const updateResponse = this.userService.update(id, updateUserDto);
+    if ('error' in updateResponse) {
+      throw new HttpException(
+        HTTP_MESSAGES[updateResponse.error],
+        updateResponse.error,
+      );
+    }
+    return updateResponse;
   }
 
   @Delete(':id')

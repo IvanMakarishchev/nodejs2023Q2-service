@@ -14,7 +14,7 @@ export interface DataBase {
 export interface User {
   id: string; // uuid v4
   login: string;
-  password: string;
+  auth: UpdatePasswordDto;
   version: number; // integer number, increments on update
   createdAt: number; // timestamp of creation
   updatedAt: number; // timestamp of last update
@@ -53,6 +53,6 @@ export interface CreateUserDto {
 }
 
 export interface UpdatePasswordDto {
-  oldPassword: string; // previous password
+  oldPassword: string | null; // previous password
   newPassword: string; // new password
 }
