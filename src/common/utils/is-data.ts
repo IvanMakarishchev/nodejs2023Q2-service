@@ -28,3 +28,12 @@ export const isTrackData = (obj: any): boolean => {
     typeof obj.duration === 'number'
   );
 };
+
+export const isArtistData = (obj: any): boolean => {
+  return (
+    'name' in obj &&
+    'grammy' in obj &&
+    typeof obj.name === 'string' &&
+    typeof obj.grammy === 'boolean'
+  );
+};

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import {
+  Artist,
   DataBase,
   Track,
   UpdatePasswordDto,
@@ -94,5 +95,43 @@ export class DataService {
       (track) => track.id !== id,
     );
     return track;
+  }
+
+  createArtist(dto: Artist) {
+    console.log(dto);
+    this.dataBase.artists.push(dto);
+    return dto;
+  }
+
+  getAllArtists() {
+    return this.dataBase.artists;
+  }
+
+  getArtist(id: string) {
+    console.log(this.getAllArtists());
+    const artist = this.dataBase.artists.find((artist) => artist.id === id);
+    return artist ? artist : false;
+  }
+
+  updateArtist(id: string, updateArtistDto: Artist) {
+    const artist = this.getArtist(id);
+    if (!artist) return false;
+    const artistIndex = this.dataBase.artists.findIndex(
+      (artist) => artist.id === id,
+    );
+    this.dataBase.artists[artistIndex] = {
+      ...artist,
+      ...updateArtistDto,
+    };
+    return this.dataBase.artists[artistIndex];
+  }
+
+  deleteArtist(id: string) {
+    const artist = this.getArtist(id);
+    if (!artist) return false;
+    this.dataBase.artists = this.dataBase.artists.filter(
+      (artist) => artist.id !== id,
+    );
+    return artist;
   }
 }
