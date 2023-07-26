@@ -60,8 +60,6 @@ describe('Tracks (e2e)', () => {
 
       const { id } = creationResponse.body;
 
-      console.log(creationResponse.body);
-
       expect(creationResponse.statusCode).toBe(StatusCodes.CREATED);
 
       const searchResponse = await unauthorizedRequest

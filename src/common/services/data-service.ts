@@ -50,7 +50,6 @@ export class DataService {
     const userIndex = this.dataBase.users.findIndex((user) => user.id === id);
     this.dataBase.users[userIndex] = userUpdatedData;
     const { password, ...resData } = userUpdatedData;
-    // console.log(resData);
     return resData;
   }
 
@@ -63,12 +62,10 @@ export class DataService {
 
   createTrack(dto: Track) {
     this.dataBase.tracks.push(dto);
-    console.log(this.dataBase.tracks);
     return dto;
   }
 
   getAllTracks() {
-    // console.log(this.dataBase.tracks);
     return this.dataBase.tracks;
   }
 
@@ -93,7 +90,9 @@ export class DataService {
   deleteTrack(id: string) {
     const track = this.getTrack(id);
     if (!track) return false;
-    this.dataBase.tracks.filter((track) => track.id !== id);
+    this.dataBase.tracks = this.dataBase.tracks.filter(
+      (track) => track.id !== id,
+    );
     return track;
   }
 }

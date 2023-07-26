@@ -10,7 +10,6 @@ import { isUUID } from 'class-validator';
 export class TrackService {
   constructor(private dataService: DataService) {}
   create(createTrackDto: Track) {
-    console.log(createTrackDto);
     if (!isTrackData(createTrackDto))
       return statusResponse(HttpStatus.BAD_REQUEST);
     const dto = {
@@ -27,7 +26,6 @@ export class TrackService {
   findOne(id: string) {
     if (!isUUID(id, '4')) return statusResponse(HttpStatus.BAD_REQUEST);
     const track = this.dataService.getTrack(id);
-    console.log(track);
     return track ? track : statusResponse(HttpStatus.NOT_FOUND);
   }
 

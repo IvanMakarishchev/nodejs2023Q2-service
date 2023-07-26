@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   Put,
@@ -12,7 +11,6 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { TrackService } from './track.service';
-import { UpdateTrackDto } from './dto/update-track.dto';
 import { Track } from 'src/common/interfaces';
 import { Response } from 'express';
 import { HTTP_MESSAGES } from 'src/common/constants';
@@ -23,7 +21,14 @@ export class TrackController {
 
   @Post()
   create(@Body() createTrackDto: Track) {
-    return this.trackService.create(createTrackDto);
+    const createResponse = this.trackService.create(createTrackDto);
+    if ('error' in createResponse) {
+      throw new HttpException(
+        HTTP_MESSAGES[createResponse.error],
+        createResponse.error,
+      );
+    }
+    return createResponse;
   }
 
   @Get()
@@ -33,12 +38,26 @@ export class TrackController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.trackService.findOne(id);
+    const trackResponse = this.trackService.findOne(id);
+    if ('error' in trackResponse) {
+      throw new HttpException(
+        HTTP_MESSAGES[trackResponse.error],
+        trackResponse.error,
+      );
+    }
+    return;
   }
 
   @Put(':id')
   update(@Param('id') id: string, @Body() updateTrackDto: Track) {
-    return this.trackService.update(id, updateTrackDto);
+    const updateResponse = this.trackService.update(id, updateTrackDto);
+    if ('error' in updateResponse) {
+      throw new HttpException(
+        HTTP_MESSAGES[updateResponse.error],
+        updateResponse.error,
+      );
+    }
+    return updateResponse;
   }
 
   @Delete(':id')
