@@ -134,6 +134,12 @@ export class DataService {
         artistId: track.artistId === id ? null : track.artistId,
       };
     });
+    this.dataBase.albums = this.dataBase.albums.map((album) => {
+      return {
+        ...album,
+        artistId: album.artistId === id ? null : album.artistId,
+      };
+    });
     this.dataBase.artists = this.dataBase.artists.filter(
       (artist) => artist.id !== id,
     );

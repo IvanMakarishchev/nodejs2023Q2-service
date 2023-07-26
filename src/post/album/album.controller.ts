@@ -45,7 +45,7 @@ export class AlbumController {
         albumResponse.error,
       );
     }
-    return;
+    return albumResponse;
   }
 
   @Put(':id')
