@@ -3,42 +3,47 @@ import { isUUID } from 'class-validator';
 import { randomUUID } from 'crypto';
 import { Album } from 'src/common/interfaces';
 import { DataService } from 'src/common/services';
-import { isAlbumData, statusResponse } from 'src/common/utils';
+import { isAlbumData } from 'src/common/utils';
 
 @Injectable()
 export class AlbumService {
   constructor(private dataService: DataService) {}
-  create(createAlbumDto: Album) {
-    if (!isAlbumData(createAlbumDto))
-      return statusResponse(HttpStatus.BAD_REQUEST);
+  create(createArtistDto: Album) {
+    let s = HttpStatus.CREATED;
+    if (!isAlbumData(createArtistDto)) s = HttpStatus.BAD_REQUEST;
     const dto = {
       id: randomUUID({ disableEntropyCache: true }),
-      ...createAlbumDto,
+      ...createArtistDto,
     };
-    return this.dataService.createAlbum(dto);
+    return { status: s, body: this.dataService.createAlbum(dto) };
   }
 
   findAll() {
-    return this.dataService.getAllAlbums();
+    return { status: HttpStatus.OK, body: this.dataService.getAllAlbums() };
   }
 
   findOne(id: string) {
-    if (!isUUID(id, '4')) return statusResponse(HttpStatus.BAD_REQUEST);
+    let s = HttpStatus.OK;
+    if (!isUUID(id, '4')) s = HttpStatus.BAD_REQUEST;
     const album = this.dataService.getAlbum(id);
-    return album ? album : statusResponse(HttpStatus.NOT_FOUND);
+    if (!album && s === HttpStatus.OK) s = HttpStatus.NOT_FOUND;
+    return { status: s, body: album };
   }
 
   update(id: string, updateAlbumDto: Album) {
-    if (!isUUID(id, '4')) return statusResponse(HttpStatus.BAD_REQUEST);
-    if (!isAlbumData(updateAlbumDto))
-      return statusResponse(HttpStatus.BAD_REQUEST);
+    let s = HttpStatus.OK;
+    if (!isUUID(id, '4') || !isAlbumData(updateAlbumDto))
+      s = HttpStatus.BAD_REQUEST;
     const album = this.dataService.updateAlbum(id, updateAlbumDto);
-    return album ? album : statusResponse(HttpStatus.NOT_FOUND);
+    if (!album && s === HttpStatus.OK) s = HttpStatus.NOT_FOUND;
+    return { status: s, body: album };
   }
 
   remove(id: string) {
-    if (!isUUID(id, '4')) return statusResponse(HttpStatus.BAD_REQUEST);
+    let s = HttpStatus.NO_CONTENT;
+    if (!isUUID(id, '4')) s = HttpStatus.BAD_REQUEST;
     const album = this.dataService.deleteAlbum(id);
-    return album ? album : statusResponse(HttpStatus.NOT_FOUND);
+    if (!album && s === HttpStatus.NO_CONTENT) s = HttpStatus.NOT_FOUND;
+    return { status: s, body: album };
   }
 }

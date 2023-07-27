@@ -187,4 +187,82 @@ export class DataService {
     );
     return album;
   }
+
+  getAllFavs() {
+    const dto = {
+      artists: this.dataBase.artists.filter((el) =>
+        this.dataBase.favorites.artists.includes(el.id),
+      ),
+      albums: this.dataBase.albums.filter((el) =>
+        this.dataBase.favorites.albums.includes(el.id),
+      ),
+      tracks: this.dataBase.tracks.filter((el) =>
+        this.dataBase.favorites.tracks.includes(el.id),
+      ),
+    };
+    return dto;
+  }
+
+  addTrackToFav(id: string) {
+    const isExist = this.getTrack(id);
+    if (!isExist) return false;
+    if (!this.dataBase.favorites.tracks.find((ID) => ID === id))
+      this.dataBase.favorites.tracks.push(id);
+    return isExist;
+  }
+
+  getAllTrackFavs() {
+    return this.dataBase.favorites.tracks;
+  }
+
+  deleteTrackFav(id: string) {
+    const isExists = this.dataBase.favorites.tracks.includes(id);
+    if (!isExists) return false;
+    this.dataBase.favorites.tracks = this.dataBase.favorites.tracks.filter(
+      (ID) => ID !== id,
+    );
+    return isExists;
+  }
+
+  addArtistToFav(id: string) {
+    const isExist = this.getArtist(id);
+    if (!isExist) return false;
+    if (!this.dataBase.favorites.artists.find((ID) => ID === id))
+      this.dataBase.favorites.artists.push(id);
+    return isExist;
+  }
+
+  getAllArtistFavs() {
+    return this.dataBase.favorites.tracks;
+  }
+
+  deleteArtistFav(id: string) {
+    const isExists = this.dataBase.favorites.artists.includes(id);
+    if (!isExists) return false;
+    this.dataBase.favorites.artists = this.dataBase.favorites.artists.filter(
+      (ID) => ID !== id,
+    );
+    return isExists;
+  }
+
+  addAlbumToFav(id: string) {
+    const isExist = this.getAlbum(id);
+    if (!isExist) return false;
+    if (!this.dataBase.favorites.albums.find((ID) => ID === id))
+      this.dataBase.favorites.albums.push(id);
+    return isExist;
+  }
+
+  getAllAlbumFavs() {
+    return this.dataBase.favorites.tracks;
+  }
+
+  deleteAlbumFav(id: string) {
+    const isExists = this.dataBase.favorites.albums.includes(id);
+    if (!isExists) return false;
+    this.dataBase.favorites.albums = this.dataBase.favorites.albums.filter(
+      (ID) => ID !== id,
+    );
+    return isExists;
+  }
 }

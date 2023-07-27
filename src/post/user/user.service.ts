@@ -1,11 +1,7 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { DataService } from 'src/common/services';
 import { CreateUserDto, UpdatePasswordDto } from 'src/common/interfaces';
-import {
-  isCreateUserData,
-  isUpdateUserData,
-  statusResponse,
-} from 'src/common/utils';
+import { isCreateUserData, isUpdateUserData } from 'src/common/utils';
 import { randomUUID } from 'crypto';
 import { isUUID } from 'class-validator';
 
@@ -14,9 +10,8 @@ export class UserService {
   constructor(private dataBase: DataService) {}
 
   create(createUserDto: CreateUserDto) {
-    if (!isCreateUserData(createUserDto)) {
-      return statusResponse(HttpStatus.BAD_REQUEST);
-    }
+    let s = HttpStatus.CREATED;
+    if (!isCreateUserData(createUserDto)) s = HttpStatus.BAD_REQUEST;
     const dto = {
       id: randomUUID({ disableEntropyCache: true }),
       version: 1,
@@ -25,32 +20,36 @@ export class UserService {
       login: createUserDto.login,
       password: createUserDto.password,
     };
-    return this.dataBase.createUser(dto);
+    return { status: s, body: this.dataBase.createUser(dto) };
   }
 
   findAll() {
-    return this.dataBase.getAllUsers();
+    return { status: HttpStatus.OK, body: this.dataBase.getAllUsers() };
   }
 
   findOne(id: string) {
-    if (!isUUID(id, '4')) return statusResponse(HttpStatus.BAD_REQUEST);
+    let s = HttpStatus.OK;
+    if (!isUUID(id, '4')) s = HttpStatus.BAD_REQUEST;
     const res = this.dataBase.getUser(id);
-    return res ? res : statusResponse(HttpStatus.NOT_FOUND);
+    if (!res && s === HttpStatus.OK) s = HttpStatus.NOT_FOUND;
+    return { status: s, body: res };
   }
 
   update(id: string, updatePasswordDto: UpdatePasswordDto) {
-    if (!isUUID(id, '4')) return statusResponse(HttpStatus.BAD_REQUEST);
-    if (!isUpdateUserData(updatePasswordDto)) {
-      return statusResponse(HttpStatus.BAD_REQUEST);
-    }
+    let s = HttpStatus.OK;
+    if (!isUUID(id, '4') || !isUpdateUserData(updatePasswordDto))
+      s = HttpStatus.BAD_REQUEST;
     const updateUser = this.dataBase.updateUser(id, updatePasswordDto);
-    if (updateUser === null) return statusResponse(HttpStatus.FORBIDDEN);
-    return updateUser ? updateUser : statusResponse(HttpStatus.NOT_FOUND);
+    if (updateUser === null && s === HttpStatus.OK) s = HttpStatus.FORBIDDEN;
+    if (!updateUser && s === HttpStatus.OK) s = HttpStatus.NOT_FOUND;
+    return { status: s, body: updateUser };
   }
 
   remove(id: string) {
-    if (!isUUID(id, '4')) return statusResponse(HttpStatus.BAD_REQUEST);
+    let s = HttpStatus.NO_CONTENT;
+    if (!isUUID(id, '4')) s = HttpStatus.BAD_REQUEST;
     const user = this.dataBase.deleteUser(id);
-    return user ? user : statusResponse(HttpStatus.NOT_FOUND);
+    if (!user && s === HttpStatus.NO_CONTENT) s = HttpStatus.NOT_FOUND;
+    return { status: s, body: user };
   }
 }

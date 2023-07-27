@@ -5,70 +5,49 @@ import {
   Body,
   Param,
   Delete,
-  HttpException,
   Put,
   Res,
-  HttpStatus,
 } from '@nestjs/common';
 import { ArtistService } from './artist.service';
 import { Artist } from 'src/common/interfaces';
-import { HTTP_MESSAGES } from 'src/common/constants';
 import { Response } from 'express';
+import { sendResponse } from 'src/common/utils';
 
 @Controller('artist')
 export class ArtistController {
   constructor(private readonly artistService: ArtistService) {}
 
   @Post()
-  create(@Body() createArtistDto: Artist) {
+  create(@Body() createArtistDto: Artist, @Res() res: Response) {
     const createResponse = this.artistService.create(createArtistDto);
-    if ('error' in createResponse) {
-      throw new HttpException(
-        HTTP_MESSAGES[createResponse.error],
-        createResponse.error,
-      );
-    }
-    return createResponse;
+    return sendResponse[createResponse.status](createResponse.body, res);
   }
 
   @Get()
-  findAll() {
-    return this.artistService.findAll();
+  findAll(@Res() res: Response) {
+    const allArtists = this.artistService.findAll();
+    return sendResponse[allArtists.status](allArtists.body, res);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: string, @Res() res: Response) {
     const artistResponse = this.artistService.findOne(id);
-    if ('error' in artistResponse) {
-      throw new HttpException(
-        HTTP_MESSAGES[artistResponse.error],
-        artistResponse.error,
-      );
-    }
-    return;
+    return sendResponse[artistResponse.status](artistResponse.body, res);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateArtistDto: Artist) {
+  update(
+    @Param('id') id: string,
+    @Body() updateArtistDto: Artist,
+    @Res() res: Response,
+  ) {
     const updateResponse = this.artistService.update(id, updateArtistDto);
-    if ('error' in updateResponse) {
-      throw new HttpException(
-        HTTP_MESSAGES[updateResponse.error],
-        updateResponse.error,
-      );
-    }
-    return updateResponse;
+    return sendResponse[updateResponse.status](updateResponse.body, res);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string, @Res() res: Response) {
     const deleteResponse = this.artistService.remove(id);
-    if ('error' in deleteResponse) {
-      throw new HttpException(
-        HTTP_MESSAGES[deleteResponse.error],
-        deleteResponse.error,
-      );
-    }
-    return res.status(HttpStatus.NO_CONTENT).send(deleteResponse);
+    return sendResponse[deleteResponse.status](deleteResponse.body, res);
   }
 }

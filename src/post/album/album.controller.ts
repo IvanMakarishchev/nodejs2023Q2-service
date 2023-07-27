@@ -5,70 +5,49 @@ import {
   Body,
   Param,
   Delete,
-  HttpException,
   Res,
-  HttpStatus,
   Put,
 } from '@nestjs/common';
 import { AlbumService } from './album.service';
 import { Album } from 'src/common/interfaces';
-import { HTTP_MESSAGES } from 'src/common/constants';
 import { Response } from 'express';
+import { sendResponse } from 'src/common/utils';
 
 @Controller('album')
 export class AlbumController {
   constructor(private readonly albumService: AlbumService) {}
 
   @Post()
-  create(@Body() createAlbumDto: Album) {
+  create(@Body() createAlbumDto: Album, @Res() res: Response) {
     const createResponse = this.albumService.create(createAlbumDto);
-    if ('error' in createResponse) {
-      throw new HttpException(
-        HTTP_MESSAGES[createResponse.error],
-        createResponse.error,
-      );
-    }
-    return createResponse;
+    return sendResponse[createResponse.status](createResponse.body, res);
   }
 
   @Get()
-  findAll() {
-    return this.albumService.findAll();
+  findAll(@Res() res: Response) {
+    const allAlbums = this.albumService.findAll();
+    return sendResponse[allAlbums.status](allAlbums.body, res);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: string, @Res() res: Response) {
     const albumResponse = this.albumService.findOne(id);
-    if ('error' in albumResponse) {
-      throw new HttpException(
-        HTTP_MESSAGES[albumResponse.error],
-        albumResponse.error,
-      );
-    }
-    return albumResponse;
+    return sendResponse[albumResponse.status](albumResponse.body, res);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateAlbumDto: Album) {
+  update(
+    @Param('id') id: string,
+    @Body() updateAlbumDto: Album,
+    @Res() res: Response,
+  ) {
     const updateResponse = this.albumService.update(id, updateAlbumDto);
-    if ('error' in updateResponse) {
-      throw new HttpException(
-        HTTP_MESSAGES[updateResponse.error],
-        updateResponse.error,
-      );
-    }
-    return updateResponse;
+    return sendResponse[updateResponse.status](updateResponse.body, res);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string, @Res() res: Response) {
     const deleteResponse = this.albumService.remove(id);
-    if ('error' in deleteResponse) {
-      throw new HttpException(
-        HTTP_MESSAGES[deleteResponse.error],
-        deleteResponse.error,
-      );
-    }
-    return res.status(HttpStatus.NO_CONTENT).send(deleteResponse);
+    return sendResponse[deleteResponse.status](deleteResponse.body, res);
   }
 }

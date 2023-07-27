@@ -1,1 +1,1 @@
-export { BASIC_DATABASE, UUID_REGEX, HTTP_MESSAGES } from './constants';
+export { BASIC_DATABASE, UUID_REGEX } from './constants';

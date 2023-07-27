@@ -1,14 +1,9 @@
-export interface ErrorInterface {
-  error: number;
-  message: string;
-}
-
 export interface DataBase {
   users: User[];
   artists: Artist[];
   tracks: Track[];
   albums: Album[];
-  favorites: Favorites[];
+  favorites: Favorites;
 }
 
 export interface User {
@@ -45,6 +40,12 @@ export interface Favorites {
   artists: string[]; // favorite artists ids
   albums: string[]; // favorite albums ids
   tracks: string[]; // favorite tracks ids
+}
+
+export interface FavoritesResponse {
+  artists: Artist[];
+  albums: Album[];
+  tracks: Track[];
 }
 
 export interface CreateUserDto {

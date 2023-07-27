@@ -7,68 +7,47 @@ import {
   Delete,
   Put,
   Res,
-  HttpStatus,
-  HttpException,
 } from '@nestjs/common';
 import { TrackService } from './track.service';
 import { Track } from 'src/common/interfaces';
 import { Response } from 'express';
-import { HTTP_MESSAGES } from 'src/common/constants';
+import { sendResponse } from 'src/common/utils';
 
 @Controller('track')
 export class TrackController {
   constructor(private readonly trackService: TrackService) {}
 
   @Post()
-  create(@Body() createTrackDto: Track) {
+  create(@Body() createTrackDto: Track, @Res() res: Response) {
     const createResponse = this.trackService.create(createTrackDto);
-    if ('error' in createResponse) {
-      throw new HttpException(
-        HTTP_MESSAGES[createResponse.error],
-        createResponse.error,
-      );
-    }
-    return createResponse;
+    return sendResponse[createResponse.status](createResponse.body, res);
   }
 
   @Get()
-  findAll() {
-    return this.trackService.findAll();
+  findAll(@Res() res: Response) {
+    const allTracks = this.trackService.findAll();
+    return sendResponse[allTracks.status](allTracks.body, res);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: string, @Res() res: Response) {
     const trackResponse = this.trackService.findOne(id);
-    if ('error' in trackResponse) {
-      throw new HttpException(
-        HTTP_MESSAGES[trackResponse.error],
-        trackResponse.error,
-      );
-    }
-    return trackResponse;
+    return sendResponse[trackResponse.status](trackResponse.body, res);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateTrackDto: Track) {
+  update(
+    @Param('id') id: string,
+    @Body() updateTrackDto: Track,
+    @Res() res: Response,
+  ) {
     const updateResponse = this.trackService.update(id, updateTrackDto);
-    if ('error' in updateResponse) {
-      throw new HttpException(
-        HTTP_MESSAGES[updateResponse.error],
-        updateResponse.error,
-      );
-    }
-    return updateResponse;
+    return sendResponse[updateResponse.status](updateResponse.body, res);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string, @Res() res: Response) {
     const deleteResponse = this.trackService.remove(id);
-    if ('error' in deleteResponse) {
-      throw new HttpException(
-        HTTP_MESSAGES[deleteResponse.error],
-        deleteResponse.error,
-      );
-    }
-    return res.status(HttpStatus.NO_CONTENT).send(deleteResponse);
+    return sendResponse[deleteResponse.status](deleteResponse.body, res);
   }
 }
