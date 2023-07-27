@@ -1,5 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { isUUID } from 'class-validator';
+import { Injectable } from '@nestjs/common';
 import { DataService } from 'src/common/services';
 
 @Injectable()
