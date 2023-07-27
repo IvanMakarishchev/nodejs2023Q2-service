@@ -1,20 +1,7 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Res,
-  HttpStatus,
-} from '@nestjs/common';
+import { Controller, Get, Post, Param, Delete, Res } from '@nestjs/common';
 import { FavAlbumService } from './album.service';
-import { CreateAlbumDto } from './dto/create-album.dto';
-import { UpdateAlbumDto } from './dto/update-album.dto';
-import { isUUID } from 'class-validator';
 import { Response } from 'express';
-import { statusResponse } from 'src/common/utils';
+import { sendResponse } from 'src/common/utils';
 
 @Controller()
 export class FavAlbumController {
@@ -22,26 +9,19 @@ export class FavAlbumController {
 
   @Post(':id')
   create(@Param('id') id: string, @Res() res: Response) {
-    if (!isUUID(id, '4'))
-      return res.status(HttpStatus.BAD_REQUEST).sendStatus(400);
     const addResponse = this.albumService.create(id);
-    if (!addResponse)
-      return res.status(HttpStatus.UNPROCESSABLE_ENTITY).sendStatus(422);
-    return res.status(HttpStatus.CREATED).send(addResponse);
+    return sendResponse[addResponse.status](addResponse.body, res);
   }
 
   @Get()
-  findAll() {
-    return this.albumService.findAll();
+  findAll(@Res() res: Response) {
+    const allAlbumFavs = this.albumService.findAll();
+    return sendResponse[allAlbumFavs.status](allAlbumFavs.body, res);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string, @Res() res: Response) {
-    if (!isUUID(id, '4'))
-      return res.status(HttpStatus.BAD_REQUEST).sendStatus(400);
     const addResponse = this.albumService.remove(id);
-    if (!addResponse)
-      return res.status(HttpStatus.UNPROCESSABLE_ENTITY).sendStatus(422);
-    return res.status(HttpStatus.NO_CONTENT).sendStatus(204);
+    return sendResponse[addResponse.status](addResponse.body, res);
   }
 }
