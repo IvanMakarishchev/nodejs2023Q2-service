@@ -7,47 +7,57 @@ import {
   Delete,
   Res,
   Put,
+  HttpStatus,
 } from '@nestjs/common';
 import { AlbumService } from './album.service';
 import { Album } from 'src/common/interfaces';
 import { Response } from 'express';
-import { sendResponse } from 'src/common/utils';
+import { isAlbumData, sendResponse } from 'src/common/utils';
+import { isUUID } from 'class-validator';
 
 @Controller('album')
 export class AlbumController {
   constructor(private readonly albumService: AlbumService) {}
 
   @Post()
-  create(@Body() createAlbumDto: Album, @Res() res: Response) {
-    const createResponse = this.albumService.create(createAlbumDto);
-    return sendResponse[createResponse.status](createResponse.body, res);
+  create(@Body() dto: Album, @Res() res: Response) {
+    let s = HttpStatus.CREATED;
+    if (!isAlbumData(dto)) s = HttpStatus.BAD_REQUEST;
+    const req = this.albumService.create(dto);
+    return sendResponse[s](req, res);
   }
 
   @Get()
   findAll(@Res() res: Response) {
-    const allAlbums = this.albumService.findAll();
-    return sendResponse[allAlbums.status](allAlbums.body, res);
+    const req = this.albumService.findAll();
+    return sendResponse[HttpStatus.OK](req, res);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string, @Res() res: Response) {
-    const albumResponse = this.albumService.findOne(id);
-    return sendResponse[albumResponse.status](albumResponse.body, res);
+    let s = HttpStatus.OK;
+    if (!isUUID(id, '4')) s = HttpStatus.BAD_REQUEST;
+    const req = this.albumService.findOne(id);
+    if (!req && s === HttpStatus.OK) s = HttpStatus.NOT_FOUND;
+    return sendResponse[s](req, res);
   }
 
   @Put(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateAlbumDto: Album,
-    @Res() res: Response,
-  ) {
-    const updateResponse = this.albumService.update(id, updateAlbumDto);
-    return sendResponse[updateResponse.status](updateResponse.body, res);
+  update(@Param('id') id: string, @Body() dto: Album, @Res() res: Response) {
+    let s = HttpStatus.OK;
+    if (!isUUID(id, '4') || !isAlbumData(dto)) s = HttpStatus.BAD_REQUEST;
+    const req = this.albumService.update(id, dto);
+    if (req === null && s === HttpStatus.OK) s = HttpStatus.FORBIDDEN;
+    if (!req && s === HttpStatus.OK) s = HttpStatus.NOT_FOUND;
+    return sendResponse[s](req, res);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string, @Res() res: Response) {
-    const deleteResponse = this.albumService.remove(id);
-    return sendResponse[deleteResponse.status](deleteResponse.body, res);
+    let s = HttpStatus.NO_CONTENT;
+    if (!isUUID(id, '4')) s = HttpStatus.BAD_REQUEST;
+    const req = this.albumService.remove(id);
+    if (!req && s === HttpStatus.NO_CONTENT) s = HttpStatus.NOT_FOUND;
+    return sendResponse[s](req, res);
   }
 }
