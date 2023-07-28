@@ -12,32 +12,33 @@ import { Response } from 'express';
 import { sendResponse } from 'src/common/utils';
 import { isUUID } from 'class-validator';
 
+const target = 'artist';
+
 @Controller()
 export class FavArtistController {
   constructor(private readonly artistService: FavArtistService) {}
 
   @Post(':id')
   create(@Param('id') id: string, @Res() res: Response) {
-    let s = HttpStatus.CREATED;
-    if (!isUUID(id, '4')) s = HttpStatus.BAD_REQUEST;
+    if (!isUUID(id, '4'))
+      return sendResponse[HttpStatus.BAD_REQUEST](res, target);
     const req = this.artistService.create(id);
-    if (!req && s === HttpStatus.CREATED) s = HttpStatus.UNPROCESSABLE_ENTITY;
-    return sendResponse[s](req, res);
+    if (!req) return sendResponse[HttpStatus.UNPROCESSABLE_ENTITY](res, target);
+    return sendResponse[HttpStatus.CREATED](res, req);
   }
 
   @Get()
   findAll(@Res() res: Response) {
     const req = this.artistService.findAll();
-    return sendResponse[HttpStatus.OK](req, res);
+    return sendResponse[HttpStatus.OK](res, req);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string, @Res() res: Response) {
-    let s = HttpStatus.NO_CONTENT;
-    if (!isUUID(id, '4')) s = HttpStatus.BAD_REQUEST;
+    if (!isUUID(id, '4'))
+      return sendResponse[HttpStatus.BAD_REQUEST](res, target);
     const req = this.artistService.remove(id);
-    if (!req && s === HttpStatus.NO_CONTENT)
-      s = HttpStatus.UNPROCESSABLE_ENTITY;
-    return sendResponse[s](req, res);
+    if (!req) return sendResponse[HttpStatus.UNPROCESSABLE_ENTITY](res, target);
+    return sendResponse[HttpStatus.NO_CONTENT](res, req);
   }
 }

@@ -1,4 +1,7 @@
-export const isCreateUserData = (obj: any): boolean => {
+import { isUUID } from 'class-validator';
+import { Album, Artist, Track, UpdatePasswordDto, User } from '../interfaces';
+
+export const isCreateUserData = (obj: any): obj is User => {
   return (
     'login' in obj &&
     'password' in obj &&
@@ -7,7 +10,7 @@ export const isCreateUserData = (obj: any): boolean => {
   );
 };
 
-export const isUpdateUserData = (obj: any): boolean => {
+export const isUpdateUserData = (obj: any): obj is UpdatePasswordDto => {
   return (
     'oldPassword' in obj &&
     'newPassword' in obj &&
@@ -16,20 +19,20 @@ export const isUpdateUserData = (obj: any): boolean => {
   );
 };
 
-export const isTrackData = (obj: any): boolean => {
+export const isTrackData = (obj: any): obj is Track => {
   return (
     'name' in obj &&
     'artistId' in obj &&
     'albumId' in obj &&
     'duration' in obj &&
     typeof obj.name === 'string' &&
-    (typeof obj.artistId === 'string' || obj.artistId === null) &&
-    (typeof obj.albumId === 'string' || obj.albumId === null) &&
+    (isUUID(obj.artistId) || obj.artistId === null) &&
+    (isUUID(obj.albumId) || obj.albumId === null) &&
     typeof obj.duration === 'number'
   );
 };
 
-export const isArtistData = (obj: any): boolean => {
+export const isArtistData = (obj: any): obj is Artist => {
   return (
     'name' in obj &&
     'grammy' in obj &&
@@ -38,13 +41,13 @@ export const isArtistData = (obj: any): boolean => {
   );
 };
 
-export const isAlbumData = (obj: any): boolean => {
+export const isAlbumData = (obj: any): obj is Album => {
   return (
     'name' in obj &&
     'year' in obj &&
     'artistId' in obj &&
     typeof obj.name === 'string' &&
     typeof obj.year === 'number' &&
-    (typeof obj.artistId === 'string' || obj.artistId === null)
+    (isUUID(obj.artistId) || obj.artistId === null)
   );
 };

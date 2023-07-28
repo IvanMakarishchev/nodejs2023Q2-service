@@ -10,6 +10,6 @@ export class FavoritesController {
   @Get()
   findAll(@Res() res: Response) {
     const req = this.favoritesService.findAll();
-    return sendResponse[HttpStatus.OK](req, res);
+    return sendResponse[HttpStatus.OK](res, req);
   }
 }

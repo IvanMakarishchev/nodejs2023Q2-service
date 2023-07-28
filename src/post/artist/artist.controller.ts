@@ -15,49 +15,51 @@ import { Response } from 'express';
 import { isArtistData, sendResponse } from 'src/common/utils';
 import { isUUID } from 'class-validator';
 
-@Controller('artist')
+const route = 'artist';
+
+@Controller(route)
 export class ArtistController {
   constructor(private readonly artistService: ArtistService) {}
 
   @Post()
   create(@Body() dto: Artist, @Res() res: Response) {
-    let s = HttpStatus.CREATED;
-    if (!isArtistData(dto)) s = HttpStatus.BAD_REQUEST;
+    if (!isArtistData(dto)) return sendResponse[HttpStatus.BAD_REQUEST](res);
     const req = this.artistService.create(dto);
-    return sendResponse[s](req, res);
+    return sendResponse[HttpStatus.CREATED](res, req);
   }
 
   @Get()
   findAll(@Res() res: Response) {
     const req = this.artistService.findAll();
-    return sendResponse[HttpStatus.OK](req, res);
+    return sendResponse[HttpStatus.OK](res, req);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string, @Res() res: Response) {
-    let s = HttpStatus.OK;
-    if (!isUUID(id, '4')) s = HttpStatus.BAD_REQUEST;
+    if (!isUUID(id, '4'))
+      return sendResponse[HttpStatus.BAD_REQUEST](res, route);
     const req = this.artistService.findOne(id);
-    if (!req && s === HttpStatus.OK) s = HttpStatus.NOT_FOUND;
-    return sendResponse[s](req, res);
+    if (!req) return sendResponse[HttpStatus.NOT_FOUND](res, route);
+    return sendResponse[HttpStatus.OK](res, req);
   }
 
   @Put(':id')
   update(@Param('id') id: string, @Body() dto: Artist, @Res() res: Response) {
-    let s = HttpStatus.OK;
-    if (!isUUID(id, '4') || !isArtistData(dto)) s = HttpStatus.BAD_REQUEST;
+    if (!isUUID(id, '4'))
+      return sendResponse[HttpStatus.BAD_REQUEST](res, route);
+    if (!isArtistData(dto)) return sendResponse[HttpStatus.BAD_REQUEST](res);
     const req = this.artistService.update(id, dto);
-    if (req === null && s === HttpStatus.OK) s = HttpStatus.FORBIDDEN;
-    if (!req && s === HttpStatus.OK) s = HttpStatus.NOT_FOUND;
-    return sendResponse[s](req, res);
+    if (req === null) return sendResponse[HttpStatus.FORBIDDEN](res, route);
+    if (!req) return sendResponse[HttpStatus.NOT_FOUND](res, route);
+    return sendResponse[HttpStatus.OK](res, req);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string, @Res() res: Response) {
-    let s = HttpStatus.NO_CONTENT;
-    if (!isUUID(id, '4')) s = HttpStatus.BAD_REQUEST;
+    if (!isUUID(id, '4'))
+      return sendResponse[HttpStatus.BAD_REQUEST](res, route);
     const req = this.artistService.remove(id);
-    if (!req && s === HttpStatus.NO_CONTENT) s = HttpStatus.NOT_FOUND;
-    return sendResponse[s](req, res);
+    if (!req) return sendResponse[HttpStatus.NOT_FOUND](res, route);
+    return sendResponse[HttpStatus.NO_CONTENT](res, req);
   }
 }
