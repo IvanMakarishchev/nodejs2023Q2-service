@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
 import { PostModule } from './post/post.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [PostModule],
+  imports: [ConfigModule.forRoot(), PostModule],
   controllers: [],
   providers: [],
 })

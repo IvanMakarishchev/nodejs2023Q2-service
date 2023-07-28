@@ -7,47 +7,59 @@ import {
   Delete,
   Res,
   Put,
+  HttpStatus,
 } from '@nestjs/common';
 import { AlbumService } from './album.service';
 import { Album } from 'src/common/interfaces';
 import { Response } from 'express';
-import { sendResponse } from 'src/common/utils';
+import { isAlbumData, sendResponse } from 'src/common/utils';
+import { isUUID } from 'class-validator';
 
-@Controller('album')
+const route = 'album';
+
+@Controller(route)
 export class AlbumController {
   constructor(private readonly albumService: AlbumService) {}
 
   @Post()
-  create(@Body() createAlbumDto: Album, @Res() res: Response) {
-    const createResponse = this.albumService.create(createAlbumDto);
-    return sendResponse[createResponse.status](createResponse.body, res);
+  create(@Body() dto: Album, @Res() res: Response) {
+    if (!isAlbumData(dto)) return sendResponse[HttpStatus.BAD_REQUEST](res);
+    const req = this.albumService.create(dto);
+    return sendResponse[HttpStatus.CREATED](res, req);
   }
 
   @Get()
   findAll(@Res() res: Response) {
-    const allAlbums = this.albumService.findAll();
-    return sendResponse[allAlbums.status](allAlbums.body, res);
+    const req = this.albumService.findAll();
+    return sendResponse[HttpStatus.OK](res, req);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string, @Res() res: Response) {
-    const albumResponse = this.albumService.findOne(id);
-    return sendResponse[albumResponse.status](albumResponse.body, res);
+    if (!isUUID(id, '4'))
+      return sendResponse[HttpStatus.BAD_REQUEST](res, route);
+    const req = this.albumService.findOne(id);
+    if (!req) return sendResponse[HttpStatus.NOT_FOUND](res, route);
+    return sendResponse[HttpStatus.OK](res, req);
   }
 
   @Put(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateAlbumDto: Album,
-    @Res() res: Response,
-  ) {
-    const updateResponse = this.albumService.update(id, updateAlbumDto);
-    return sendResponse[updateResponse.status](updateResponse.body, res);
+  update(@Param('id') id: string, @Body() dto: Album, @Res() res: Response) {
+    if (!isUUID(id, '4'))
+      return sendResponse[HttpStatus.BAD_REQUEST](res, route);
+    if (!isAlbumData(dto)) return sendResponse[HttpStatus.BAD_REQUEST](res);
+    const req = this.albumService.update(id, dto);
+    if (req === null) return sendResponse[HttpStatus.FORBIDDEN](res, route);
+    if (!req) return sendResponse[HttpStatus.NOT_FOUND](res, route);
+    return sendResponse[HttpStatus.OK](res, req);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string, @Res() res: Response) {
-    const deleteResponse = this.albumService.remove(id);
-    return sendResponse[deleteResponse.status](deleteResponse.body, res);
+    if (!isUUID(id, '4'))
+      return sendResponse[HttpStatus.BAD_REQUEST](res, route);
+    const req = this.albumService.remove(id);
+    if (!req) return sendResponse[HttpStatus.NOT_FOUND](res, route);
+    return sendResponse[HttpStatus.NO_CONTENT](res, req);
   }
 }

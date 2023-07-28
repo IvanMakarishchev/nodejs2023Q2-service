@@ -7,47 +7,66 @@ import {
   Delete,
   Res,
   Put,
+  HttpStatus,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto, UpdatePasswordDto } from 'src/common/interfaces';
 import { Response } from 'express';
-import { sendResponse } from 'src/common/utils';
+import {
+  isCreateUserData,
+  isUpdateUserData,
+  sendResponse,
+} from 'src/common/utils';
+import { isUUID } from 'class-validator';
 
-@Controller('user')
+const route = 'user';
+@Controller(route)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  create(@Body() userData: CreateUserDto, @Res() res: Response) {
-    const createResponse = this.userService.create(userData);
-    return sendResponse[createResponse.status](createResponse.body, res);
+  create(@Body() dto: CreateUserDto, @Res() res: Response) {
+    if (!isCreateUserData(dto))
+      return sendResponse[HttpStatus.BAD_REQUEST](res);
+    const req = this.userService.create(dto);
+    return sendResponse[HttpStatus.CREATED](res, req);
   }
 
   @Get()
   findAll(@Res() res: Response) {
-    const allData = this.userService.findAll();
-    return sendResponse[allData.status](allData.body, res);
+    const req = this.userService.findAll();
+    return sendResponse[HttpStatus.OK](res, req);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string, @Res() res: Response) {
-    const userResponse = this.userService.findOne(id);
-    return sendResponse[userResponse.status](userResponse.body, res);
+    if (!isUUID(id, '4'))
+      return sendResponse[HttpStatus.BAD_REQUEST](res, route);
+    const req = this.userService.findOne(id);
+    if (!req) return sendResponse[HttpStatus.NOT_FOUND](res, route);
+    return sendResponse[HttpStatus.OK](res, req);
   }
 
   @Put(':id')
   update(
     @Param('id') id: string,
-    @Body() updateUserDto: UpdatePasswordDto,
+    @Body() dto: UpdatePasswordDto,
     @Res() res: Response,
   ) {
-    const updateResponse = this.userService.update(id, updateUserDto);
-    return sendResponse[updateResponse.status](updateResponse.body, res);
+    if (!isUUID(id, '4') || !isUpdateUserData(dto))
+      return sendResponse[HttpStatus.BAD_REQUEST](res, route);
+    const req = this.userService.update(id, dto);
+    if (req === null) return sendResponse[HttpStatus.FORBIDDEN](res, route);
+    if (!req) return sendResponse[HttpStatus.NOT_FOUND](res, route);
+    return sendResponse[HttpStatus.OK](res, req);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string, @Res() res: Response) {
-    const deleteResponse = this.userService.remove(id);
-    return sendResponse[deleteResponse.status](deleteResponse.body, res);
+    if (!isUUID(id, '4'))
+      return sendResponse[HttpStatus.BAD_REQUEST](res, route);
+    const req = this.userService.remove(id);
+    if (!req) return sendResponse[HttpStatus.NOT_FOUND](res, route);
+    return sendResponse[HttpStatus.NO_CONTENT](res, req);
   }
 }

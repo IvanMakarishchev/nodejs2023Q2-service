@@ -1,214 +1,87 @@
 import { Injectable } from '@nestjs/common';
-import {
-  Album,
-  Artist,
-  DataBase,
-  Track,
-  UpdatePasswordDto,
-  User,
-} from '../interfaces/interfaces';
+import { Album, Artist, DataBase, Track, User } from '../interfaces/interfaces';
 import { BASIC_DATABASE } from '../constants';
 
 @Injectable()
 export class DataService {
   private dataBase: DataBase = BASIC_DATABASE;
 
-  getUserById(id: string) {
-    return this.dataBase.users.find((user) => user.id === id);
-  }
-
   createUser(dto: User) {
     this.dataBase.users.push(dto);
-    const { password, ...safeData } = dto;
-    return safeData;
   }
 
   getAllUsers() {
-    const res = this.dataBase.users.map((user) => {
-      const { password, ...safeData } = user;
-      return safeData;
-    });
-    return res;
+    return this.dataBase.users;
   }
 
-  getUser(id: string) {
-    const user = this.getUserById(id);
-    if (!user) return false;
-    const { password, ...safeData } = user;
-    return safeData;
-  }
-
-  updateUser(id: string, dto: UpdatePasswordDto) {
-    const user = this.getUserById(id);
-    if (!user) return false;
-    const { password: pas, ...safeData } = user;
-    if (pas !== dto.oldPassword) return null;
-    const userUpdatedData: User = {
-      ...safeData,
-      password: dto.newPassword,
-      version: safeData.version + 1,
-      updatedAt: Date.now(),
-    };
-    const userIndex = this.dataBase.users.findIndex((user) => user.id === id);
-    this.dataBase.users[userIndex] = userUpdatedData;
-    const { password, ...resData } = userUpdatedData;
-    return resData;
+  updateUser(id: number, dto: User) {
+    this.dataBase.users[id] = dto;
   }
 
   deleteUser(id: string) {
-    const user = this.getUserById(id);
-    if (!user) return false;
     this.dataBase.users = this.dataBase.users.filter((user) => user.id !== id);
-    return user;
   }
 
   createTrack(dto: Track) {
     this.dataBase.tracks.push(dto);
-    return dto;
   }
 
   getAllTracks() {
     return this.dataBase.tracks;
   }
 
-  getTrack(id: string) {
-    const track = this.dataBase.tracks.find((track) => track.id === id);
-    return track ? track : false;
-  }
-
-  updateTrack(id: string, dto: Track) {
-    const track = this.getTrack(id);
-    if (!track) return false;
-    const trackIndex = this.dataBase.tracks.findIndex(
-      (track) => track.id === id,
-    );
-    this.dataBase.tracks[trackIndex] = {
-      ...track,
-      ...dto,
-    };
-    return this.dataBase.tracks[trackIndex];
+  updateTrack(id: number, dto: Track) {
+    this.dataBase.tracks[id] = dto;
   }
 
   deleteTrack(id: string) {
-    const track = this.getTrack(id);
-    if (!track) return false;
     this.dataBase.tracks = this.dataBase.tracks.filter(
       (track) => track.id !== id,
     );
-    return track;
   }
 
   createArtist(dto: Artist) {
     this.dataBase.artists.push(dto);
-    return dto;
   }
 
   getAllArtists() {
     return this.dataBase.artists;
   }
 
-  getArtist(id: string) {
-    const artist = this.dataBase.artists.find((artist) => artist.id === id);
-    return artist ? artist : false;
-  }
-
-  updateArtist(id: string, dto: Artist) {
-    const artist = this.getArtist(id);
-    if (!artist) return false;
-    const artistIndex = this.dataBase.artists.findIndex(
-      (artist) => artist.id === id,
-    );
-    this.dataBase.artists[artistIndex] = {
-      ...artist,
-      ...dto,
-    };
-    return this.dataBase.artists[artistIndex];
+  updateArtist(id: number, dto: Artist) {
+    this.dataBase.artists[id] = dto;
   }
 
   deleteArtist(id: string) {
-    const artist = this.getArtist(id);
-    if (!artist) return false;
-    this.dataBase.tracks = this.dataBase.tracks.map((track) => {
-      return {
-        ...track,
-        artistId: track.artistId === id ? null : track.artistId,
-      };
-    });
-    this.dataBase.albums = this.dataBase.albums.map((album) => {
-      return {
-        ...album,
-        artistId: album.artistId === id ? null : album.artistId,
-      };
-    });
     this.dataBase.artists = this.dataBase.artists.filter(
       (artist) => artist.id !== id,
     );
-    return artist;
   }
 
   createAlbum(dto: Album) {
     this.dataBase.albums.push(dto);
-    return dto;
   }
 
   getAllAlbums() {
     return this.dataBase.albums;
   }
 
-  getAlbum(id: string) {
-    const album = this.dataBase.albums.find((album) => album.id === id);
-    return album ? album : false;
-  }
-
-  updateAlbum(id: string, dto: Album) {
-    const album = this.getAlbum(id);
-    if (!album) return false;
-    const albumIndex = this.dataBase.albums.findIndex(
-      (album) => album.id === id,
-    );
-    this.dataBase.albums[albumIndex] = {
-      ...album,
-      ...dto,
-    };
-    return this.dataBase.albums[albumIndex];
+  updateAlbum(id: number, dto: Album) {
+    this.dataBase.albums[id] = dto;
   }
 
   deleteAlbum(id: string) {
-    const album = this.getAlbum(id);
-    if (!album) return false;
-    this.dataBase.tracks = this.dataBase.tracks.map((track) => {
-      return {
-        ...track,
-        albumId: track.albumId === id ? null : track.albumId,
-      };
-    });
     this.dataBase.albums = this.dataBase.albums.filter(
       (album) => album.id !== id,
     );
-    return album;
   }
 
   getAllFavs() {
-    const dto = {
-      artists: this.dataBase.artists.filter((el) =>
-        this.dataBase.favorites.artists.includes(el.id),
-      ),
-      albums: this.dataBase.albums.filter((el) =>
-        this.dataBase.favorites.albums.includes(el.id),
-      ),
-      tracks: this.dataBase.tracks.filter((el) =>
-        this.dataBase.favorites.tracks.includes(el.id),
-      ),
-    };
-    return dto;
+    return this.dataBase.favorites;
   }
 
   addTrackToFav(id: string) {
-    const isExist = this.getTrack(id);
-    if (!isExist) return false;
-    if (!this.dataBase.favorites.tracks.find((ID) => ID === id))
-      this.dataBase.favorites.tracks.push(id);
-    return isExist;
+    this.dataBase.favorites.tracks.push(id);
   }
 
   getAllTrackFavs() {
@@ -216,53 +89,36 @@ export class DataService {
   }
 
   deleteTrackFav(id: string) {
-    const isExists = this.dataBase.favorites.tracks.includes(id);
-    if (!isExists) return false;
     this.dataBase.favorites.tracks = this.dataBase.favorites.tracks.filter(
       (ID) => ID !== id,
     );
-    return isExists;
   }
 
   addArtistToFav(id: string) {
-    const isExist = this.getArtist(id);
-    if (!isExist) return false;
-    if (!this.dataBase.favorites.artists.find((ID) => ID === id))
-      this.dataBase.favorites.artists.push(id);
-    return isExist;
+    this.dataBase.favorites.artists.push(id);
   }
 
   getAllArtistFavs() {
-    return this.dataBase.favorites.tracks;
+    return this.dataBase.favorites.artists;
   }
 
   deleteArtistFav(id: string) {
-    const isExists = this.dataBase.favorites.artists.includes(id);
-    if (!isExists) return false;
     this.dataBase.favorites.artists = this.dataBase.favorites.artists.filter(
       (ID) => ID !== id,
     );
-    return isExists;
   }
 
   addAlbumToFav(id: string) {
-    const isExist = this.getAlbum(id);
-    if (!isExist) return false;
-    if (!this.dataBase.favorites.albums.find((ID) => ID === id))
-      this.dataBase.favorites.albums.push(id);
-    return isExist;
+    this.dataBase.favorites.albums.push(id);
   }
 
   getAllAlbumFavs() {
-    return this.dataBase.favorites.tracks;
+    return this.dataBase.favorites.albums;
   }
 
   deleteAlbumFav(id: string) {
-    const isExists = this.dataBase.favorites.albums.includes(id);
-    if (!isExists) return false;
     this.dataBase.favorites.albums = this.dataBase.favorites.albums.filter(
       (ID) => ID !== id,
     );
-    return isExists;
   }
 }

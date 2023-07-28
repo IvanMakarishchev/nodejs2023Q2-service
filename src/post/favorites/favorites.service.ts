@@ -6,6 +6,17 @@ export class FavoritesService {
   constructor(private dataService: DataService) {}
 
   findAll() {
-    return this.dataService.getAllFavs();
+    const dto = {
+      artists: this.dataService
+        .getAllArtists()
+        .filter((el) => this.dataService.getAllFavs().artists.includes(el.id)),
+      albums: this.dataService
+        .getAllAlbums()
+        .filter((el) => this.dataService.getAllFavs().albums.includes(el.id)),
+      tracks: this.dataService
+        .getAllTracks()
+        .filter((el) => this.dataService.getAllFavs().tracks.includes(el.id)),
+    };
+    return dto;
   }
 }

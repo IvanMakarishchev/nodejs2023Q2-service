@@ -1,49 +1,44 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Track } from 'src/common/interfaces';
 import { DataService } from 'src/common/services';
-import { isTrackData } from 'src/common/utils';
 import { randomUUID } from 'crypto';
-import { isUUID } from 'class-validator';
 
 @Injectable()
 export class TrackService {
   constructor(private dataService: DataService) {}
-  create(createTrackDto: Track) {
-    let s = HttpStatus.CREATED;
-    if (!isTrackData(createTrackDto)) s = HttpStatus.BAD_REQUEST;
+  create(data: Track) {
     const dto = {
       id: randomUUID({ disableEntropyCache: true }),
-      ...createTrackDto,
+      ...data,
     };
-    return { status: s, body: this.dataService.createTrack(dto) };
+    this.dataService.createTrack(dto);
+    return dto;
   }
 
   findAll() {
-    return { status: HttpStatus.OK, body: this.dataService.getAllTracks() };
+    return this.dataService.getAllTracks();
   }
 
   findOne(id: string) {
-    let s = HttpStatus.OK;
-    if (!isUUID(id, '4')) s = HttpStatus.BAD_REQUEST;
-    const track = this.dataService.getTrack(id);
-    if (!track && s === HttpStatus.OK) s = HttpStatus.NOT_FOUND;
-    return { status: s, body: track };
+    return this.findAll().find((el) => el.id === id);
   }
 
-  update(id: string, updateTrackDto: Track) {
-    let s = HttpStatus.OK;
-    if (!isUUID(id, '4') || !isTrackData(updateTrackDto))
-      s = HttpStatus.BAD_REQUEST;
-    const track = this.dataService.updateTrack(id, updateTrackDto);
-    if (!track && s === HttpStatus.OK) s = HttpStatus.NOT_FOUND;
-    return { status: s, body: track };
+  update(id: string, dto: Track) {
+    const data = this.dataService.getAllTracks();
+    const index = data.findIndex((el) => el.id === id);
+    if (index < 0) return false;
+    const updatedDto = {
+      ...data[index],
+      ...dto,
+    };
+    this.dataService.updateTrack(index, updatedDto);
+    return updatedDto;
   }
 
   remove(id: string) {
-    let s = HttpStatus.NO_CONTENT;
-    if (!isUUID(id, '4')) s = HttpStatus.BAD_REQUEST;
-    const track = this.dataService.deleteTrack(id);
-    if (!track && s === HttpStatus.NO_CONTENT) s = HttpStatus.NOT_FOUND;
-    return { status: s, body: track };
+    const data = this.findOne(id);
+    if (!data) return false;
+    this.dataService.deleteTrack(id);
+    return id;
   }
 }
