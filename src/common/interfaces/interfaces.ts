@@ -57,8 +57,3 @@ export interface UpdatePasswordDto {
   oldPassword: string | null; // previous password
   newPassword: string; // new password
 }
-
-export interface Message {
-  endpoint: string;
-  method: string;
-}

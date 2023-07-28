@@ -18,43 +18,12 @@ import {
   sendResponse,
 } from 'src/common/utils';
 import { isUUID } from 'class-validator';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 const route = 'user';
-// @ApiTags('Users')
 @Controller(route)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  // @ApiOperation({
-  //   tags: ['Users'],
-  //   summary: 'Create user',
-  //   description: 'Creates a new user',
-  // })
-  // @ApiBody({
-  //   required: true,
-  //   schema: {
-  //     type: 'object',
-  //     title: 'example',
-  //     properties: {
-  //       login: { type: 'string', description: "The user's login" },
-  //       password: { type: 'string', description: "The user's password" },
-  //     },
-  //     required: ['login', 'password'],
-  //   },
-  // })
-  // @ApiResponse({
-  //   status: 201,
-  //   description: 'The user has been created.',
-  // })
-  // @ApiResponse({
-  //   status: 400,
-  //   description: 'Bad request. body does not contain required fields.',
-  // })
-  // @ApiResponse({
-  //   status: 401,
-  //   description: 'Access token is missing or invalid',
-  // })
   @Post()
   create(@Body() dto: CreateUserDto, @Res() res: Response) {
     if (!isCreateUserData(dto))
@@ -63,25 +32,6 @@ export class UserController {
     return sendResponse[HttpStatus.CREATED](res, req);
   }
 
-  // @ApiOperation({
-  //   tags: ['Users'],
-  //   summary: 'Get all users',
-  //   description: 'Gets all users',
-  // })
-  // @ApiResponse({
-  //   status: 200,
-  //   description: 'Successful operation',
-  //   schema: {
-  //     type: 'array',
-  //     items: {
-  //       $ref: '#/components/schemas/User',
-  //     },
-  //   },
-  // })
-  // @ApiResponse({
-  //   status: 401,
-  //   description: 'Access token is missing or invalid',
-  // })
   @Get()
   findAll(@Res() res: Response) {
     const req = this.userService.findAll();
@@ -94,7 +44,6 @@ export class UserController {
       return sendResponse[HttpStatus.BAD_REQUEST](res, route);
     const req = this.userService.findOne(id);
     if (!req) return sendResponse[HttpStatus.NOT_FOUND](res, route);
-    console.log(id);
     return sendResponse[HttpStatus.OK](res, req);
   }
 

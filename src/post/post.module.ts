@@ -5,7 +5,6 @@ import { TrackModule } from './track/track.module';
 import { AlbumModule } from './album/album.module';
 import { RouterModule } from '@nestjs/core';
 import { FavoritesModule } from './favorites/favorites.module';
-import { DataService } from 'src/common/services';
 
 const ROUTES = [{ path: '/favs', module: FavoritesModule }];
 

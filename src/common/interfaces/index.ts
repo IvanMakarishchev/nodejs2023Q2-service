@@ -8,5 +8,4 @@ export {
   FavoritesResponse,
   CreateUserDto,
   UpdatePasswordDto,
-  Message,
 } from './interfaces';
