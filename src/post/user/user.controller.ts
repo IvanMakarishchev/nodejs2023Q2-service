@@ -9,7 +9,6 @@ import {
   Put,
   HttpStatus,
   ParseUUIDPipe,
-  SerializeOptions,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Response } from 'express';
@@ -23,9 +22,6 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  @SerializeOptions({
-    excludeExtraneousValues: true,
-  })
   async create(@Body() dto: CreateUserDto, @Res() res: Response) {
     return await this.userService.create(dto).then((data) => {
       return sendResponse[HttpStatus.CREATED](res, {
@@ -37,9 +33,6 @@ export class UserController {
   }
 
   @Get()
-  @SerializeOptions({
-    excludeExtraneousValues: true,
-  })
   async findAll(@Res() res: Response) {
     return await this.userService
       .findAll()

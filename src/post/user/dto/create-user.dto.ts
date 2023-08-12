@@ -1,5 +1,4 @@
-import { Transform } from 'class-transformer';
-import { IsNotEmpty, IsUUID } from 'class-validator';
+import { IsNotEmpty } from 'class-validator';
 export class CreateUserDto {
   @IsNotEmpty()
   login: string;
