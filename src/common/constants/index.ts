@@ -1,1 +1,1 @@
-export { BASIC_DATABASE, UUID_REGEX } from './constants';
+export { BASIC_DATABASE, SAFE_FIELDS, UUID_REGEX } from './constants';

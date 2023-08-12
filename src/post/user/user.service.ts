@@ -1,58 +1,55 @@
 import { Injectable } from '@nestjs/common';
-import { DataService } from 'src/common/services';
-import { CreateUserDto, UpdatePasswordDto } from 'src/common/interfaces';
-import { randomUUID } from 'crypto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from './entities/user.entity';
+import { Repository } from 'typeorm';
+import { CreateUserDto } from './dto/create-user.dto';
+import { SAFE_FIELDS } from 'src/common/constants';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
-  constructor(private dataService: DataService) {}
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+  ) {}
 
-  create(createUserDto: CreateUserDto) {
-    const dto = {
-      id: randomUUID({ disableEntropyCache: true }),
-      version: 1,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-      login: createUserDto.login,
-      password: createUserDto.password,
-    };
-    this.dataService.createUser(dto);
-    const { password, ...safeData } = dto;
-    return safeData;
+  async create(createUserDto: CreateUserDto) {
+    const dto = this.userRepository.create(createUserDto);
+    return await this.userRepository
+      .save(dto)
+      .then((data) => this.findOne(data.id));
   }
 
-  findAll() {
-    const res = this.dataService.getAllUsers().map((el) => {
-      const { password, ...safeData } = el;
-      return safeData;
+  async findAll() {
+    return await this.userRepository.find({
+      select: SAFE_FIELDS,
     });
-    return res;
   }
 
-  findOne(id: string) {
-    return this.findAll().find((el) => el.id === id);
+  async findOne(id: string) {
+    return await this.userRepository.findOne({
+      where: { id },
+      select: SAFE_FIELDS,
+    });
   }
 
-  update(id: string, dto: UpdatePasswordDto) {
-    const data = this.dataService.getAllUsers();
-    const index = data.findIndex((el) => el.id === id);
-    if (index < 0) return false;
-    if (data[index].password !== dto.oldPassword) return null;
-    const updatedDto = {
-      ...data[index],
-      password: dto.newPassword,
-      version: data[index].version + 1,
-      updatedAt: Date.now(),
-    };
-    this.dataService.updateUser(index, updatedDto);
-    const { password, ...safeData } = updatedDto;
-    return safeData;
+  async update(id: string, dto: UpdateUserDto) {
+    const user = await this.userRepository.findOne({ where: { id } });
+    return !user
+      ? null
+      : user.password !== dto.oldPassword
+      ? false
+      : await this.userRepository
+          .save({
+            ...user,
+            password: dto.newPassword,
+          })
+          .then(async (data) => this.findOne(data.id));
   }
 
-  remove(id: string) {
-    const data = this.findOne(id);
-    if (!data) return false;
-    this.dataService.deleteUser(id);
-    return id;
+  async remove(id: string) {
+    return await this.findOne(id).then(async (data) =>
+      !data ? false : await this.userRepository.delete({ id: id }),
+    );
   }
 }
