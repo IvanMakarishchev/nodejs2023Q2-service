@@ -12,10 +12,9 @@ import {
 } from '@nestjs/common';
 import { TrackService } from './track.service';
 import { Response } from 'express';
-import { sendResponse } from 'src/common/utils';
+import { isTrackData, sendResponse } from 'src/common/utils';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { CreateTrackDto } from './dto/create-track.dto';
-import { isUUID } from 'class-validator';
 
 const route = 'track';
 @Controller(route)
@@ -53,10 +52,7 @@ export class TrackController {
     @Body() dto: UpdateTrackDto,
     @Res() res: Response,
   ) {
-    if (
-      (dto.albumId !== null && !isUUID(dto.albumId)) ||
-      (dto.artistId !== null && !isUUID(dto.artistId))
-    )
+    if (!isTrackData(dto))
       return sendResponse[HttpStatus.BAD_REQUEST](res, route);
     return await this.trackService.update(id, dto).then((data) => {
       return !data

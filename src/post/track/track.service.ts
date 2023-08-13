@@ -9,33 +9,30 @@ import { CreateTrackDto } from './dto/create-track.dto';
 export class TrackService {
   constructor(
     @InjectRepository(Track)
-    private readonly userRepository: Repository<Track>,
+    private readonly trackRepository: Repository<Track>,
   ) {}
   async create(data: CreateTrackDto) {
-    const dto = this.userRepository.create(data);
-    console.log(data);
-    return await this.userRepository.save(dto);
+    const dto = this.trackRepository.create(data);
+    return await this.trackRepository.save(dto);
   }
 
   async findAll() {
-    return await this.userRepository.find();
+    return await this.trackRepository.find();
   }
 
   async findOne(id: string) {
-    return await this.userRepository.findOne({ where: { id } });
+    return await this.trackRepository.findOne({ where: { id } });
   }
 
   async update(id: string, dto: UpdateTrackDto) {
     const track = await this.findOne(id);
     return !track
       ? false
-      : await this.userRepository
-          .update(track, { ...track, ...dto })
-          .then(async () => await this.findOne(id));
+      : await this.trackRepository.save({ ...track, ...dto });
   }
 
   async remove(id: string) {
     const track = await this.findOne(id);
-    return !track ? false : await this.userRepository.delete(id);
+    return !track ? false : await this.trackRepository.delete(id);
   }
 }

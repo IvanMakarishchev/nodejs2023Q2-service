@@ -5,6 +5,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 import { User } from './post/user/entities/user.entity';
 import { Track } from './post/track/entities/track.entity';
+import { Artist } from './post/artist/entities/artist.entity';
+import { Album } from './post/album/entities/album.entity';
 
 @Module({
   imports: [
@@ -20,7 +22,7 @@ import { Track } from './post/track/entities/track.entity';
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
         synchronize: true,
-        entities: [User, Track],
+        entities: [User, Track, Artist, Album],
       }),
       inject: [ConfigService],
     }),
