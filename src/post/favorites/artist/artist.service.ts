@@ -1,26 +1,31 @@
 import { Injectable } from '@nestjs/common';
-import { DataService } from 'src/common/services';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { FavArtists } from './entities/artist.entity';
+import { Artist } from 'src/post/artist/entities/artist.entity';
 
 @Injectable()
 export class FavArtistService {
-  constructor(private dataService: DataService) {}
+  constructor(
+    @InjectRepository(FavArtists)
+    private readonly favArtistRepository: Repository<FavArtists>,
+    @InjectRepository(Artist)
+    private readonly artistsRepository: Repository<Artist>,
+  ) {}
 
-  create(id: string) {
-    const isExists = this.dataService
-      .getAllArtists()
-      .find((el) => el.id === id);
-    if (!isExists) return false;
-    this.dataService.addArtistToFav(id);
+  async addArtist(id: string) {
+    const artist = await this.artistsRepository.findOne({ where: { id } });
+    if (!artist) return false;
+    const dto = this.favArtistRepository.create({ artistId: id });
+    await this.favArtistRepository.save(dto);
     return id;
   }
 
-  findAll() {
-    return this.dataService.getAllArtistFavs();
+  async findAllArtistsFavs() {
+    return await this.favArtistRepository.find();
   }
 
-  remove(id: string) {
-    if (!this.findAll().includes(id)) return false;
-    this.dataService.deleteArtistFav(id);
-    return id;
+  async removeArtistFromFavs(id: string) {
+    return await this.favArtistRepository.delete({ artistId: id });
   }
 }

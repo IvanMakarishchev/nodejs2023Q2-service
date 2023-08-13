@@ -6,11 +6,11 @@ import {
   Delete,
   Res,
   HttpStatus,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { FavArtistService } from './artist.service';
 import { Response } from 'express';
 import { sendResponse } from 'src/common/utils';
-import { isUUID } from 'class-validator';
 
 const target = 'artist';
 
@@ -18,27 +18,32 @@ const target = 'artist';
 export class FavArtistController {
   constructor(private readonly artistService: FavArtistService) {}
 
-  @Post(':id')
-  create(@Param('id') id: string, @Res() res: Response) {
-    if (!isUUID(id, '4'))
-      return sendResponse[HttpStatus.BAD_REQUEST](res, target);
-    const req = this.artistService.create(id);
-    if (!req) return sendResponse[HttpStatus.UNPROCESSABLE_ENTITY](res, target);
-    return sendResponse[HttpStatus.CREATED](res, req);
-  }
-
   @Get()
-  findAll(@Res() res: Response) {
-    const req = this.artistService.findAll();
+  async findAllArtistsFavs(@Res() res: Response) {
+    const req = await this.artistService.findAllArtistsFavs();
     return sendResponse[HttpStatus.OK](res, req);
   }
 
+  @Post(':id')
+  async addArtist(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Res() res: Response,
+  ) {
+    return await this.artistService.addArtist(id).then((data) => {
+      return !data
+        ? sendResponse[HttpStatus.UNPROCESSABLE_ENTITY](res, 'artist')
+        : sendResponse[HttpStatus.CREATED](res, data);
+    });
+  }
+
   @Delete(':id')
-  remove(@Param('id') id: string, @Res() res: Response) {
-    if (!isUUID(id, '4'))
-      return sendResponse[HttpStatus.BAD_REQUEST](res, target);
-    const req = this.artistService.remove(id);
-    if (!req) return sendResponse[HttpStatus.UNPROCESSABLE_ENTITY](res, target);
-    return sendResponse[HttpStatus.NO_CONTENT](res, req);
+  async removeArtistFromFavs(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Res() res: Response,
+  ) {
+    const req = await this.artistService.removeArtistFromFavs(id);
+    return !req
+      ? sendResponse[HttpStatus.UNPROCESSABLE_ENTITY](res, 'artist')
+      : sendResponse[HttpStatus.NO_CONTENT](res, req);
   }
 }

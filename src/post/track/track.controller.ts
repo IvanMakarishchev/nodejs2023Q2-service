@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { TrackService } from './track.service';
 import { Response } from 'express';
-import { isTrackData, sendResponse } from 'src/common/utils';
+import { sendResponse } from 'src/common/utils';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { CreateTrackDto } from './dto/create-track.dto';
 
@@ -52,8 +52,8 @@ export class TrackController {
     @Body() dto: UpdateTrackDto,
     @Res() res: Response,
   ) {
-    if (!isTrackData(dto))
-      return sendResponse[HttpStatus.BAD_REQUEST](res, route);
+    // if (!isTrackData(dto))
+    //   return sendResponse[HttpStatus.BAD_REQUEST](res, route);
     return await this.trackService.update(id, dto).then((data) => {
       return !data
         ? sendResponse[HttpStatus.NOT_FOUND](res, route)

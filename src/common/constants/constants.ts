@@ -1,15 +1,3 @@
-export const BASIC_DATABASE = {
-  users: [],
-  artists: [],
-  tracks: [],
-  albums: [],
-  favorites: {
-    artists: [],
-    albums: [],
-    tracks: [],
-  },
-};
-
 export const SAFE_FIELDS = {
   id: true,
   login: true,

@@ -6,39 +6,41 @@ import {
   Delete,
   Res,
   HttpStatus,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { FavTrackService } from './track.service';
 import { Response } from 'express';
 import { sendResponse } from 'src/common/utils';
-import { isUUID } from 'class-validator';
-
-const target = 'track';
 
 @Controller()
 export class FavTrackController {
   constructor(private readonly trackService: FavTrackService) {}
 
-  @Post(':id')
-  create(@Param('id') id: string, @Res() res: Response) {
-    if (!isUUID(id, '4'))
-      return sendResponse[HttpStatus.BAD_REQUEST](res, target);
-    const req = this.trackService.create(id);
-    if (!req) return sendResponse[HttpStatus.UNPROCESSABLE_ENTITY](res, target);
-    return sendResponse[HttpStatus.CREATED](res, req);
-  }
-
   @Get()
-  findAll(@Res() res: Response) {
-    const req = this.trackService.findAll();
+  async findAllTracksFavs(@Res() res: Response) {
+    const req = await this.trackService.findAllTracksFavs();
     return sendResponse[HttpStatus.OK](res, req);
   }
 
+  @Post(':id')
+  async addTrack(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response) {
+    return await this.trackService
+      .addTrack(id)
+      .then((data) =>
+        !data
+          ? sendResponse[HttpStatus.UNPROCESSABLE_ENTITY](res, 'track')
+          : sendResponse[HttpStatus.CREATED](res, data),
+      );
+  }
+
   @Delete(':id')
-  remove(@Param('id') id: string, @Res() res: Response) {
-    if (!isUUID(id, '4'))
-      return sendResponse[HttpStatus.BAD_REQUEST](res, target);
-    const req = this.trackService.remove(id);
-    if (!req) return sendResponse[HttpStatus.UNPROCESSABLE_ENTITY](res, target);
-    return sendResponse[HttpStatus.NO_CONTENT](res, req);
+  async removeTrackFromFavs(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Res() res: Response,
+  ) {
+    const req = await this.trackService.removeTrackFromFavs(id);
+    return !req
+      ? sendResponse[HttpStatus.UNPROCESSABLE_ENTITY](res, 'track')
+      : sendResponse[HttpStatus.NO_CONTENT](res, req);
   }
 }

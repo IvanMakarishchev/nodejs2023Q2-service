@@ -9,11 +9,14 @@ import {
   Put,
   HttpStatus,
   ParseUUIDPipe,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { AlbumService } from './album.service';
-import { Album } from 'src/common/interfaces';
 import { Response } from 'express';
-import { isAlbumData, sendResponse } from 'src/common/utils';
+import { sendResponse } from 'src/common/utils';
+import { UpdateAlbumDto } from './dto/update-album.dto';
+import { CreateAlbumDto } from './dto/create-album.dto';
 
 const route = 'album';
 
@@ -22,9 +25,10 @@ export class AlbumController {
   constructor(private readonly albumService: AlbumService) {}
 
   @Post()
-  async create(@Body() dto: Album, @Res() res: Response) {
-    if (!isAlbumData(dto))
-      return sendResponse[HttpStatus.BAD_REQUEST](res, route);
+  @UsePipes(ValidationPipe)
+  async create(@Body() dto: CreateAlbumDto, @Res() res: Response) {
+    // if (!isAlbumData(dto))
+    //   return sendResponse[HttpStatus.BAD_REQUEST](res, route);
     return await this.albumService
       .create(dto)
       .then((data) => sendResponse[HttpStatus.CREATED](res, data));
@@ -49,12 +53,13 @@ export class AlbumController {
   }
 
   @Put(':id')
+  @UsePipes(ValidationPipe)
   async update(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: Album,
+    @Body() dto: UpdateAlbumDto,
     @Res() res: Response,
   ) {
-    if (!isAlbumData(dto)) return sendResponse[HttpStatus.BAD_REQUEST](res);
+    // if (!isAlbumData(dto)) return sendResponse[HttpStatus.BAD_REQUEST](res);
     return await this.albumService
       .update(id, dto)
       .then((data) =>
