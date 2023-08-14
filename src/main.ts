@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { components, paths, security } from 'doc/doc';
+import { ValidationPipe } from '@nestjs/common';
 
 class Main {
   private port: number;
@@ -11,6 +12,8 @@ class Main {
   }
   async bootstrap() {
     const app = await NestFactory.create(AppModule);
+
+    app.useGlobalPipes(new ValidationPipe());
 
     const config = new DocumentBuilder()
       .setTitle('Home Library Service')

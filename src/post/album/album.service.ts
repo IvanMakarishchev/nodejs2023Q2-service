@@ -1,49 +1,47 @@
 import { Injectable } from '@nestjs/common';
-import { randomUUID } from 'crypto';
-import { Album } from 'src/common/interfaces';
-import { DataService } from 'src/common/services';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Album } from './entities/album.entity';
+import { CreateAlbumDto } from './dto/create-album.dto';
+import { UpdateAlbumDto } from './dto/update-album.dto';
+import { Track } from '../track/entities/track.entity';
 
 @Injectable()
 export class AlbumService {
-  constructor(private dataService: DataService) {}
-  create(data: Album) {
-    const dto = {
-      id: randomUUID({ disableEntropyCache: true }),
-      ...data,
-    };
-    this.dataService.createAlbum(dto);
-    return dto;
+  constructor(
+    @InjectRepository(Album)
+    private readonly albumRepository: Repository<Album>,
+    @InjectRepository(Track)
+    private readonly trackRepository: Repository<Track>,
+  ) {}
+  async create(data: CreateAlbumDto) {
+    const album = this.albumRepository.create(data);
+    return await this.albumRepository.save(album);
   }
 
-  findAll() {
-    return this.dataService.getAllAlbums();
+  async findAll() {
+    return await this.albumRepository.find();
   }
 
-  findOne(id: string) {
-    return this.findAll().find((el) => el.id === id);
+  async findOne(id: string) {
+    return await this.albumRepository.findOne({ where: { id } });
   }
 
-  update(id: string, dto: Album) {
-    const data = this.dataService.getAllAlbums();
-    const index = data.findIndex((el) => el.id === id);
-    if (index < 0) return false;
-    const updatedDto = {
-      ...data[index],
-      ...dto,
-    };
-    this.dataService.updateAlbum(index, updatedDto);
-    return updatedDto;
+  async update(id: string, dto: UpdateAlbumDto) {
+    const album = await this.findOne(id);
+    return !album
+      ? false
+      : await this.albumRepository.save({ ...album, ...dto });
   }
 
-  remove(id: string) {
-    this.dataService.getAllTracks().forEach((track, index) => {
-      if (track.albumId === id) {
-        this.dataService.updateTrack(index, { ...track, albumId: null });
-      }
-    });
-    const data = this.findOne(id);
-    if (!data) return false;
-    this.dataService.deleteAlbum(id);
-    return id;
+  async remove(id: string) {
+    const album = await this.findOne(id);
+    if (!album) return false;
+    const tracks = await this.trackRepository.findBy({ albumId: id });
+    tracks.forEach(
+      async (track) =>
+        await this.trackRepository.save({ ...track, albumId: null }),
+    );
+    return await this.albumRepository.delete(id);
   }
 }

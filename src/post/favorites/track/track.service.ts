@@ -1,24 +1,31 @@
 import { Injectable } from '@nestjs/common';
-import { DataService } from 'src/common/services';
+import { FavTracks } from './entities/track.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Track } from 'src/post/track/entities/track.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class FavTrackService {
-  constructor(private dataService: DataService) {}
+  constructor(
+    @InjectRepository(FavTracks)
+    private readonly favTrackRepository: Repository<FavTracks>,
+    @InjectRepository(Track)
+    private readonly tracksRepository: Repository<Track>,
+  ) {}
 
-  create(id: string) {
-    const isExists = this.dataService.getAllTracks().find((el) => el.id === id);
-    if (!isExists) return false;
-    this.dataService.addTrackToFav(id);
+  async addTrack(id: string) {
+    const track = await this.tracksRepository.findOne({ where: { id } });
+    if (!track) return false;
+    const dto = this.favTrackRepository.create({ trackId: id });
+    await this.favTrackRepository.save(dto);
     return id;
   }
 
-  findAll() {
-    return this.dataService.getAllTrackFavs();
+  async findAllTracksFavs() {
+    return await this.favTrackRepository.find();
   }
 
-  remove(id: string) {
-    if (!this.findAll().includes(id)) return false;
-    this.dataService.deleteTrackFav(id);
-    return id;
+  async removeTrackFromFavs(id: string) {
+    return await this.favTrackRepository.delete({ trackId: id });
   }
 }

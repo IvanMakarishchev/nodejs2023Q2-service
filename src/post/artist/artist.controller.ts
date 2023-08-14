@@ -8,12 +8,13 @@ import {
   Put,
   Res,
   HttpStatus,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { ArtistService } from './artist.service';
-import { Artist } from 'src/common/interfaces';
 import { Response } from 'express';
-import { isArtistData, sendResponse } from 'src/common/utils';
-import { isUUID } from 'class-validator';
+import { sendResponse } from 'src/common/utils';
+import { CreateArtistDto } from './dto/create-artist.dto';
+import { UpdateArtistDto } from './dto/update-artist.dto';
 
 const route = 'artist';
 
@@ -22,44 +23,51 @@ export class ArtistController {
   constructor(private readonly artistService: ArtistService) {}
 
   @Post()
-  create(@Body() dto: Artist, @Res() res: Response) {
-    if (!isArtistData(dto)) return sendResponse[HttpStatus.BAD_REQUEST](res);
-    const req = this.artistService.create(dto);
-    return sendResponse[HttpStatus.CREATED](res, req);
+  async create(@Body() dto: CreateArtistDto, @Res() res: Response) {
+    return await this.artistService.create(dto).then((data) => {
+      return sendResponse[HttpStatus.CREATED](res, data);
+    });
   }
 
   @Get()
-  findAll(@Res() res: Response) {
-    const req = this.artistService.findAll();
-    return sendResponse[HttpStatus.OK](res, req);
+  async findAll(@Res() res: Response) {
+    return await this.artistService
+      .findAll()
+      .then((data) => sendResponse[HttpStatus.OK](res, data));
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @Res() res: Response) {
-    if (!isUUID(id, '4'))
-      return sendResponse[HttpStatus.BAD_REQUEST](res, route);
-    const req = this.artistService.findOne(id);
-    if (!req) return sendResponse[HttpStatus.NOT_FOUND](res, route);
-    return sendResponse[HttpStatus.OK](res, req);
+  async findOne(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response) {
+    return await this.artistService
+      .findOne(id)
+      .then((data) =>
+        !data
+          ? sendResponse[HttpStatus.NOT_FOUND](res, route)
+          : sendResponse[HttpStatus.OK](res, data),
+      );
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() dto: Artist, @Res() res: Response) {
-    if (!isUUID(id, '4'))
-      return sendResponse[HttpStatus.BAD_REQUEST](res, route);
-    if (!isArtistData(dto)) return sendResponse[HttpStatus.BAD_REQUEST](res);
-    const req = this.artistService.update(id, dto);
-    if (req === null) return sendResponse[HttpStatus.FORBIDDEN](res, route);
-    if (!req) return sendResponse[HttpStatus.NOT_FOUND](res, route);
-    return sendResponse[HttpStatus.OK](res, req);
+  async update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateArtistDto,
+    @Res() res: Response,
+  ) {
+    return await this.artistService.update(id, dto).then((data) => {
+      return !data
+        ? sendResponse[HttpStatus.NOT_FOUND](res, route)
+        : sendResponse[HttpStatus.OK](res, data);
+    });
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string, @Res() res: Response) {
-    if (!isUUID(id, '4'))
-      return sendResponse[HttpStatus.BAD_REQUEST](res, route);
-    const req = this.artistService.remove(id);
-    if (!req) return sendResponse[HttpStatus.NOT_FOUND](res, route);
-    return sendResponse[HttpStatus.NO_CONTENT](res, req);
+  async remove(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response) {
+    return await this.artistService
+      .remove(id)
+      .then((data) =>
+        !data
+          ? sendResponse[HttpStatus.NOT_FOUND](res, route)
+          : sendResponse[HttpStatus.NO_CONTENT](res, data),
+      );
   }
 }
