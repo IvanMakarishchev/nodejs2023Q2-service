@@ -9,6 +9,6 @@ export class LoginController {
   @Post()
   async logIn(@Body() loginDto: LoginDto) {
     const res = await this.loginService.logIn(loginDto);
-    console.log(res);
+    return res;
   }
 }
