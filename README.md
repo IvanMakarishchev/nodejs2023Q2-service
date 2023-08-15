@@ -23,10 +23,27 @@ Use configuration from .env.example file
 
 ## Running application
 
+1. Run Docker Desktop
+2. Run containers:
+>  from Docker Hub:
+> ```
+> npm run docker:pull
+> ```
+> or build from downloaded files:
+> ```
+> npm run docker:build
+> ```
+3. Open terminal of home_service container in Docker Desktop:
+![image](https://github.com/IvanMakarishchev/nodejs2023Q2-service/assets/95377483/44738731-94a3-4393-9e0d-fdeb75c631a2)
+![image](https://github.com/IvanMakarishchev/nodejs2023Q2-service/assets/95377483/1be11c03-0258-47a8-8399-801c87dec674)
+4. Run migrations:
 ```
-npm start
+npm run migration
 ```
-After starting the app on port (4000 as default)
+5. Run tests:
+```
+npm run test
+``` 
 
 ## OpenAPI documentation
 
