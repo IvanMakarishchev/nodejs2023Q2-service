@@ -147,7 +147,7 @@ export const security: SecurityRequirementObject[] = [
 ];
 
 export const paths: PathsObject = {
-  '/login': {
+  '/auth/login': {
     post: {
       tags: ['Login'],
       security: [],
@@ -198,7 +198,7 @@ export const paths: PathsObject = {
       },
     },
   },
-  '/signup': {
+  '/auth/signup': {
     post: {
       tags: ['Signup'],
       security: [],
