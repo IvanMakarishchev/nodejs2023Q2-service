@@ -4,7 +4,9 @@ import { AuthController } from './auth.controller';
 import { SignupModule } from './signup/signup.module';
 import { LoginModule } from './login/login.module';
 import { RefreshModule } from './refresh/refresh.module';
-import { RouterModule, Routes } from '@nestjs/core';
+import { APP_GUARD, RouterModule, Routes } from '@nestjs/core';
+import { AuthGuard } from './guard/auth.guard';
+import { JwtService } from '@nestjs/jwt';
 
 const ROUTES: Routes = [
   { path: '*/login', module: LoginModule },
@@ -14,7 +16,14 @@ const ROUTES: Routes = [
 
 @Module({
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [
+    AuthService,
+    JwtService,
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+  ],
   imports: [
     RouterModule.register(ROUTES),
     SignupModule,
