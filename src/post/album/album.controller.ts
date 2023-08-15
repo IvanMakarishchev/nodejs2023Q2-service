@@ -8,12 +8,15 @@ import {
   Res,
   Put,
   HttpStatus,
+  ParseUUIDPipe,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { AlbumService } from './album.service';
-import { Album } from 'src/common/interfaces';
 import { Response } from 'express';
-import { isAlbumData, sendResponse } from 'src/common/utils';
-import { isUUID } from 'class-validator';
+import { sendResponse } from 'src/common/utils';
+import { UpdateAlbumDto } from './dto/update-album.dto';
+import { CreateAlbumDto } from './dto/create-album.dto';
 
 const route = 'album';
 
@@ -22,44 +25,58 @@ export class AlbumController {
   constructor(private readonly albumService: AlbumService) {}
 
   @Post()
-  create(@Body() dto: Album, @Res() res: Response) {
-    if (!isAlbumData(dto)) return sendResponse[HttpStatus.BAD_REQUEST](res);
-    const req = this.albumService.create(dto);
-    return sendResponse[HttpStatus.CREATED](res, req);
+  @UsePipes(ValidationPipe)
+  async create(@Body() dto: CreateAlbumDto, @Res() res: Response) {
+    // if (!isAlbumData(dto))
+    //   return sendResponse[HttpStatus.BAD_REQUEST](res, route);
+    return await this.albumService
+      .create(dto)
+      .then((data) => sendResponse[HttpStatus.CREATED](res, data));
   }
 
   @Get()
-  findAll(@Res() res: Response) {
-    const req = this.albumService.findAll();
-    return sendResponse[HttpStatus.OK](res, req);
+  async findAll(@Res() res: Response) {
+    return await this.albumService
+      .findAll()
+      .then((data) => sendResponse[HttpStatus.OK](res, data));
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @Res() res: Response) {
-    if (!isUUID(id, '4'))
-      return sendResponse[HttpStatus.BAD_REQUEST](res, route);
-    const req = this.albumService.findOne(id);
-    if (!req) return sendResponse[HttpStatus.NOT_FOUND](res, route);
-    return sendResponse[HttpStatus.OK](res, req);
+  async findOne(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response) {
+    return await this.albumService
+      .findOne(id)
+      .then((data) =>
+        !data
+          ? sendResponse[HttpStatus.NOT_FOUND](res, route)
+          : sendResponse[HttpStatus.OK](res, data),
+      );
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() dto: Album, @Res() res: Response) {
-    if (!isUUID(id, '4'))
-      return sendResponse[HttpStatus.BAD_REQUEST](res, route);
-    if (!isAlbumData(dto)) return sendResponse[HttpStatus.BAD_REQUEST](res);
-    const req = this.albumService.update(id, dto);
-    if (req === null) return sendResponse[HttpStatus.FORBIDDEN](res, route);
-    if (!req) return sendResponse[HttpStatus.NOT_FOUND](res, route);
-    return sendResponse[HttpStatus.OK](res, req);
+  @UsePipes(ValidationPipe)
+  async update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateAlbumDto,
+    @Res() res: Response,
+  ) {
+    // if (!isAlbumData(dto)) return sendResponse[HttpStatus.BAD_REQUEST](res);
+    return await this.albumService
+      .update(id, dto)
+      .then((data) =>
+        !data
+          ? sendResponse[HttpStatus.NOT_FOUND](res, route)
+          : sendResponse[HttpStatus.OK](res, data),
+      );
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string, @Res() res: Response) {
-    if (!isUUID(id, '4'))
-      return sendResponse[HttpStatus.BAD_REQUEST](res, route);
-    const req = this.albumService.remove(id);
-    if (!req) return sendResponse[HttpStatus.NOT_FOUND](res, route);
-    return sendResponse[HttpStatus.NO_CONTENT](res, req);
+  async remove(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response) {
+    return await this.albumService
+      .remove(id)
+      .then((data) =>
+        !data
+          ? sendResponse[HttpStatus.NOT_FOUND](res, route)
+          : sendResponse[HttpStatus.NO_CONTENT](res, data),
+      );
   }
 }

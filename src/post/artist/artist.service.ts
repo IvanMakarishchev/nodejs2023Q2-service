@@ -1,54 +1,55 @@
 import { Injectable } from '@nestjs/common';
-import { DataService } from 'src/common/services';
-import { Artist } from 'src/common/interfaces';
-import { randomUUID } from 'crypto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Artist } from './entities/artist.entity';
+import { Repository } from 'typeorm';
+import { CreateArtistDto } from './dto/create-artist.dto';
+import { UpdateArtistDto } from './dto/update-artist.dto';
+import { Track } from '../track/entities/track.entity';
+import { Album } from '../album/entities/album.entity';
 
 @Injectable()
 export class ArtistService {
-  constructor(private dataService: DataService) {}
-  create(data: Artist) {
-    const dto = {
-      id: randomUUID({ disableEntropyCache: true }),
-      ...data,
-    };
-    this.dataService.createArtist(dto);
-    return dto;
+  constructor(
+    @InjectRepository(Artist)
+    private readonly artistRepository: Repository<Artist>,
+    @InjectRepository(Track)
+    private readonly trackRepository: Repository<Track>,
+    @InjectRepository(Album)
+    private readonly albumRepository: Repository<Album>,
+  ) {}
+  async create(data: CreateArtistDto) {
+    const dto = this.artistRepository.create(data);
+    return await this.artistRepository.save(dto);
   }
 
-  findAll() {
-    return this.dataService.getAllArtists();
+  async findAll() {
+    return await this.artistRepository.find();
   }
 
-  findOne(id: string) {
-    return this.findAll().find((el) => el.id === id);
+  async findOne(id: string) {
+    return await this.artistRepository.findOne({ where: { id } });
   }
 
-  update(id: string, dto: Artist) {
-    const data = this.dataService.getAllArtists();
-    const index = data.findIndex((el) => el.id === id);
-    if (index < 0) return false;
-    const updatedDto = {
-      ...data[index],
-      ...dto,
-    };
-    this.dataService.updateArtist(index, updatedDto);
-    return updatedDto;
+  async update(id: string, dto: UpdateArtistDto) {
+    const artist = await this.findOne(id);
+    return !artist
+      ? false
+      : await this.artistRepository.save({ ...artist, ...dto });
   }
 
-  remove(id: string) {
-    this.dataService.getAllTracks().forEach((track, index) => {
-      if (track.artistId === id) {
-        this.dataService.updateTrack(index, { ...track, artistId: null });
-      }
-    });
-    this.dataService.getAllAlbums().forEach((album, index) => {
-      if (album.artistId === id) {
-        this.dataService.updateAlbum(index, { ...album, artistId: null });
-      }
-    });
-    const data = this.findOne(id);
-    if (!data) return false;
-    this.dataService.deleteArtist(id);
-    return id;
+  async remove(id: string) {
+    const artist = await this.findOne(id);
+    if (!artist) return false;
+    const tracks = await this.trackRepository.findBy({ artistId: artist.id });
+    const albums = await this.albumRepository.findBy({ artistId: artist.id });
+    tracks.forEach(
+      async (track) =>
+        await this.trackRepository.save({ ...track, artistId: null }),
+    );
+    albums.forEach(
+      async (album) =>
+        await this.albumRepository.save({ ...album, artistId: null }),
+    );
+    return await this.artistRepository.delete(id);
   }
 }

@@ -1,1 +1,7 @@
-export class CreateAlbumDto {}
+import { IsNotEmpty, IsString } from 'class-validator';
+
+export class CreateAlbumDto {
+  @IsString()
+  @IsNotEmpty()
+  albumId: string;
+}

@@ -8,12 +8,13 @@ import {
   Put,
   Res,
   HttpStatus,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { TrackService } from './track.service';
-import { Track } from 'src/common/interfaces';
 import { Response } from 'express';
-import { isTrackData, sendResponse } from 'src/common/utils';
-import { isUUID } from 'class-validator';
+import { sendResponse } from 'src/common/utils';
+import { UpdateTrackDto } from './dto/update-track.dto';
+import { CreateTrackDto } from './dto/create-track.dto';
 
 const route = 'track';
 @Controller(route)
@@ -21,44 +22,53 @@ export class TrackController {
   constructor(private readonly trackService: TrackService) {}
 
   @Post()
-  create(@Body() dto: Track, @Res() res: Response) {
-    if (!isTrackData(dto)) return sendResponse[HttpStatus.BAD_REQUEST](res);
-    const req = this.trackService.create(dto);
-    return sendResponse[HttpStatus.CREATED](res, req);
+  async create(@Body() dto: CreateTrackDto, @Res() res: Response) {
+    return await this.trackService.create(dto).then((data) => {
+      return sendResponse[HttpStatus.CREATED](res, data);
+    });
   }
 
   @Get()
-  findAll(@Res() res: Response) {
-    const req = this.trackService.findAll();
-    return sendResponse[HttpStatus.OK](res, req);
+  async findAll(@Res() res: Response) {
+    return await this.trackService
+      .findAll()
+      .then((data) => sendResponse[HttpStatus.OK](res, data));
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @Res() res: Response) {
-    if (!isUUID(id, '4'))
-      return sendResponse[HttpStatus.BAD_REQUEST](res, route);
-    const req = this.trackService.findOne(id);
-    if (!req) return sendResponse[HttpStatus.NOT_FOUND](res, route);
-    return sendResponse[HttpStatus.OK](res, req);
+  async findOne(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response) {
+    return await this.trackService
+      .findOne(id)
+      .then((data) =>
+        !data
+          ? sendResponse[HttpStatus.NOT_FOUND](res, route)
+          : sendResponse[HttpStatus.OK](res, data),
+      );
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() dto: Track, @Res() res: Response) {
-    if (!isUUID(id, '4'))
-      return sendResponse[HttpStatus.BAD_REQUEST](res, route);
-    if (!isTrackData(dto)) return sendResponse[HttpStatus.BAD_REQUEST](res);
-    const req = this.trackService.update(id, dto);
-    if (req === null) return sendResponse[HttpStatus.FORBIDDEN](res, route);
-    if (!req) return sendResponse[HttpStatus.NOT_FOUND](res, route);
-    return sendResponse[HttpStatus.OK](res, req);
+  async update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateTrackDto,
+    @Res() res: Response,
+  ) {
+    // if (!isTrackData(dto))
+    //   return sendResponse[HttpStatus.BAD_REQUEST](res, route);
+    return await this.trackService.update(id, dto).then((data) => {
+      return !data
+        ? sendResponse[HttpStatus.NOT_FOUND](res, route)
+        : sendResponse[HttpStatus.OK](res, data);
+    });
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string, @Res() res: Response) {
-    if (!isUUID(id, '4'))
-      return sendResponse[HttpStatus.BAD_REQUEST](res, route);
-    const req = this.trackService.remove(id);
-    if (!req) return sendResponse[HttpStatus.NOT_FOUND](res, route);
-    return sendResponse[HttpStatus.NO_CONTENT](res, req);
+  async remove(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response) {
+    return await this.trackService
+      .remove(id)
+      .then((data) =>
+        !data
+          ? sendResponse[HttpStatus.NOT_FOUND](res, route)
+          : sendResponse[HttpStatus.NO_CONTENT](res, data),
+      );
   }
 }

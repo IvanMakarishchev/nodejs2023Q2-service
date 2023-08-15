@@ -1,44 +1,38 @@
 import { Injectable } from '@nestjs/common';
-import { Track } from 'src/common/interfaces';
-import { DataService } from 'src/common/services';
-import { randomUUID } from 'crypto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Track } from './entities/track.entity';
+import { Repository } from 'typeorm';
+import { UpdateTrackDto } from './dto/update-track.dto';
+import { CreateTrackDto } from './dto/create-track.dto';
 
 @Injectable()
 export class TrackService {
-  constructor(private dataService: DataService) {}
-  create(data: Track) {
-    const dto = {
-      id: randomUUID({ disableEntropyCache: true }),
-      ...data,
-    };
-    this.dataService.createTrack(dto);
-    return dto;
+  constructor(
+    @InjectRepository(Track)
+    private readonly trackRepository: Repository<Track>,
+  ) {}
+  async create(data: CreateTrackDto) {
+    const dto = this.trackRepository.create(data);
+    return await this.trackRepository.save(dto);
   }
 
-  findAll() {
-    return this.dataService.getAllTracks();
+  async findAll() {
+    return await this.trackRepository.find();
   }
 
-  findOne(id: string) {
-    return this.findAll().find((el) => el.id === id);
+  async findOne(id: string) {
+    return await this.trackRepository.findOne({ where: { id } });
   }
 
-  update(id: string, dto: Track) {
-    const data = this.dataService.getAllTracks();
-    const index = data.findIndex((el) => el.id === id);
-    if (index < 0) return false;
-    const updatedDto = {
-      ...data[index],
-      ...dto,
-    };
-    this.dataService.updateTrack(index, updatedDto);
-    return updatedDto;
+  async update(id: string, dto: UpdateTrackDto) {
+    const track = await this.findOne(id);
+    return !track
+      ? false
+      : await this.trackRepository.save({ ...track, ...dto });
   }
 
-  remove(id: string) {
-    const data = this.findOne(id);
-    if (!data) return false;
-    this.dataService.deleteTrack(id);
-    return id;
+  async remove(id: string) {
+    const track = await this.findOne(id);
+    return !track ? false : await this.trackRepository.delete(id);
   }
 }

@@ -1,24 +1,31 @@
 import { Injectable } from '@nestjs/common';
-import { DataService } from 'src/common/services';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Album } from 'src/post/album/entities/album.entity';
+import { Repository } from 'typeorm';
+import { FavAlbums } from './entities/album.entity';
 
 @Injectable()
 export class FavAlbumService {
-  constructor(private dataService: DataService) {}
+  constructor(
+    @InjectRepository(FavAlbums)
+    private readonly favAlbumRepository: Repository<FavAlbums>,
+    @InjectRepository(Album)
+    private readonly albumsRepository: Repository<Album>,
+  ) {}
 
-  create(id: string) {
-    const isExists = this.dataService.getAllAlbums().find((el) => el.id === id);
-    if (!isExists) return false;
-    this.dataService.addAlbumToFav(id);
+  async addAlbum(id: string) {
+    const album = await this.albumsRepository.findOne({ where: { id } });
+    if (!album) return false;
+    const dto = this.favAlbumRepository.create({ albumId: id });
+    await this.favAlbumRepository.save(dto);
     return id;
   }
 
-  findAll() {
-    return this.dataService.getAllAlbumFavs();
+  async findAllAlbumsFavs() {
+    return await this.favAlbumRepository.find();
   }
 
-  remove(id: string) {
-    if (!this.findAll().includes(id)) return false;
-    this.dataService.deleteAlbumFav(id);
-    return id;
+  async removeAlbumFromFavs(id: string) {
+    return await this.favAlbumRepository.delete({ albumId: id });
   }
 }

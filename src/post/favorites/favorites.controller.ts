@@ -8,8 +8,9 @@ export class FavoritesController {
   constructor(private readonly favoritesService: FavoritesService) {}
 
   @Get()
-  findAll(@Res() res: Response) {
-    const req = this.favoritesService.findAll();
-    return sendResponse[HttpStatus.OK](res, req);
+  async findAll(@Res() res: Response) {
+    return await this.favoritesService
+      .findAll()
+      .then((data) => sendResponse[HttpStatus.OK](res, data));
   }
 }
