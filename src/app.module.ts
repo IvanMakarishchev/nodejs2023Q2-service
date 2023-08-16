@@ -24,6 +24,7 @@ const ROUTES: Routes = [{ path: '/auth', module: AuthModule }];
   ],
   controllers: [],
   providers: [
+    ConfigService,
     JwtService,
     {
       provide: APP_GUARD,
