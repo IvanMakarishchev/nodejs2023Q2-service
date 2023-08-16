@@ -4,7 +4,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { dataSourceOptions } from './db/data-source';
 import { AuthModule } from './auth/auth.module';
-import { RouterModule, Routes } from '@nestjs/core';
+import { APP_GUARD, RouterModule, Routes } from '@nestjs/core';
+import { JwtService } from '@nestjs/jwt';
+import { AuthGuard } from './auth/guard/auth.guard';
 
 const ROUTES: Routes = [{ path: '/auth', module: AuthModule }];
 
@@ -21,6 +23,12 @@ const ROUTES: Routes = [{ path: '/auth', module: AuthModule }];
     AuthModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    JwtService,
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+  ],
 })
 export class AppModule {}

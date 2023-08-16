@@ -1,34 +1,23 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { SignupModule } from './signup/signup.module';
-import { LoginModule } from './login/login.module';
-import { RefreshModule } from './refresh/refresh.module';
-import { APP_GUARD, RouterModule, Routes } from '@nestjs/core';
-import { AuthGuard } from './guard/auth.guard';
-import { JwtService } from '@nestjs/jwt';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from 'src/post/user/entities/user.entity';
 
-const ROUTES: Routes = [
-  { path: '*/login', module: LoginModule },
-  { path: '*/signup', module: SignupModule },
-  { path: '*/refresh', module: RefreshModule },
-];
+const configService = new ConfigService();
 
+@Global()
 @Module({
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    JwtService,
-    {
-      provide: APP_GUARD,
-      useClass: AuthGuard,
-    },
-  ],
+  providers: [AuthService],
   imports: [
-    RouterModule.register(ROUTES),
-    SignupModule,
-    LoginModule,
-    RefreshModule,
+    TypeOrmModule.forFeature([User]),
+    JwtModule.register({
+      secret: configService.get('JWT_SECRET_KEY'),
+      signOptions: { expiresIn: configService.get('TOKEN_EXPIRE_TIME') },
+    }),
   ],
 })
 export class AuthModule {}

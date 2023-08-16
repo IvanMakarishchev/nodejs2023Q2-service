@@ -15,6 +15,7 @@ import { Response } from 'express';
 import { sendResponse } from 'src/common/utils';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Public } from 'src/common/decorators/public';
 
 const route = 'user';
 @Controller(route)
@@ -32,6 +33,7 @@ export class UserController {
     });
   }
 
+  @Public()
   @Get()
   async findAll(@Res() res: Response) {
     return await this.userService
