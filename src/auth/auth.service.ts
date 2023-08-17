@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { AuthDto } from './dto/auth.dto';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
+import { Auth } from './entities/auth.entity';
 
 @Injectable()
 export class AuthService {
@@ -16,6 +17,8 @@ export class AuthService {
     private jwtService: JwtService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Auth)
+    private readonly authRepository: Repository<Auth>,
   ) {
     this.saltRounds = +this.configService.get('CRYPT_SALT');
   }
