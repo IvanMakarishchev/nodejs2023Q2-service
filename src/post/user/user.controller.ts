@@ -9,6 +9,7 @@ import {
   Put,
   HttpStatus,
   ParseUUIDPipe,
+  Headers,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Response } from 'express';
@@ -33,7 +34,6 @@ export class UserController {
     });
   }
 
-  @Public()
   @Get()
   async findAll(@Res() res: Response) {
     return await this.userService

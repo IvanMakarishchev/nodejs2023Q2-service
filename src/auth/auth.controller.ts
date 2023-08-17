@@ -32,6 +32,6 @@ export class AuthController {
   @HttpCode(201)
   @Post('signup')
   async create(@Body() signupDto: AuthDto) {
-    await this.authService.signUp(signupDto);
+    return await this.authService.signUp(signupDto);
   }
 }

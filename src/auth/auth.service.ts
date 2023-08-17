@@ -27,9 +27,9 @@ export class AuthService {
     if (!user) return false;
     const isAccepted = await bcrypt.compare(loginDto.password, user.password);
     if (!isAccepted) return false;
-    const payload = { sub: user.id, username: user.login };
+    const payload = { sub: user.id, username: user.login, iat: Date.now() };
     return {
-      access_token: await this.jwtService.signAsync(payload),
+      accessToken: await this.jwtService.signAsync(payload),
     };
   }
 
@@ -38,8 +38,10 @@ export class AuthService {
       const salt = await bcrypt.genSalt(this.saltRounds);
       const hash = await bcrypt.hash(signupDto.password, salt);
       const user = this.userRepository.create({ ...signupDto, password: hash });
-      await this.userRepository.save(user);
-      return true;
+      return await this.userRepository.save(user).then((data) => {
+        const { password, ...safeData } = data;
+        return safeData;
+      });
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
