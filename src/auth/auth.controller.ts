@@ -9,6 +9,7 @@ import {
 import { AuthService } from './auth.service';
 import { Public } from 'src/common/decorators/public';
 import { AuthDto } from './dto/auth.dto';
+import { RefreshDto } from './dto/refresh.dto';
 
 @Controller()
 export class AuthController {
@@ -31,7 +32,15 @@ export class AuthController {
   @Public()
   @HttpCode(201)
   @Post('signup')
-  async create(@Body() signupDto: AuthDto) {
+  async signup(@Body() signupDto: AuthDto) {
     return await this.authService.signUp(signupDto);
+  }
+
+  @HttpCode(200)
+  @Post('refresh')
+  async refresh(@Body() refreshDto: RefreshDto) {
+    const req = await this.authService.refreshToken(refreshDto);
+    if (!req) throw new ForbiddenException();
+    return req;
   }
 }

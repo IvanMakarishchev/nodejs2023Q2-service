@@ -9,14 +9,12 @@ import {
   Put,
   HttpStatus,
   ParseUUIDPipe,
-  Headers,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Response } from 'express';
 import { sendResponse } from 'src/common/utils';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Public } from 'src/common/decorators/public';
 
 const route = 'user';
 @Controller(route)

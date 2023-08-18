@@ -243,6 +243,45 @@ export const paths: PathsObject = {
       },
     },
   },
+  '/auth/refresh': {
+    post: {
+      tags: ['Refresh'],
+      security: [],
+      summary: 'Refresh',
+      description: 'Refresh accessToken',
+      requestBody: {
+        required: true,
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              title: 'example',
+              properties: {
+                refreshToken: {
+                  type: 'string',
+                  minLength: 3,
+                  maxLength: 255,
+                  description: 'refreshToken',
+                },
+              },
+              required: ['refreshToken'],
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: 'Successful refresh',
+        },
+        401: {
+          description: 'Unauthorized',
+        },
+        403: {
+          description: 'Forbidden',
+        },
+      },
+    },
+  },
   '/user': {
     get: {
       tags: ['Users'],
