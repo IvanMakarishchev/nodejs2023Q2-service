@@ -4,10 +4,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/post/user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { AuthDto } from './dto/auth.dto';
-import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { RefreshDto } from './dto/refresh.dto';
-
+import * as bcrypt from 'bcryptjs';
 @Injectable()
 export class AuthService {
   saltRounds: number;

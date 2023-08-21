@@ -13,13 +13,13 @@ export const dataSourceOptions = (): DataSourceOptions => {
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     entities: [
-      join(__dirname, '../auth/entities/*.entity{.ts,.js}'),
       join(__dirname, '../post/**/entities/*.entity{.ts,.js}'),
       join(__dirname, '../post/favorites/**/entities/*.entity{.ts,.js}'),
     ],
     migrations: [join(__dirname, './migrations/*{.ts,.js}')],
     migrationsTableName: 'migrations',
-    synchronize: true,
+    synchronize: false,
+    migrationsRun: true,
   };
 };
 

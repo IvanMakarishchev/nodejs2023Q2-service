@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { PostModule } from './post/post.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { APP_GUARD, RouterModule, Routes } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { AuthGuard } from './auth/guard/auth.guard';
+import { LogMiddleware } from './common/utils/log.middleware';
 
 const ROUTES: Routes = [{ path: '/auth', module: AuthModule }];
 
@@ -32,4 +33,8 @@ const ROUTES: Routes = [{ path: '/auth', module: AuthModule }];
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LogMiddleware).forRoutes('*');
+  }
+}
