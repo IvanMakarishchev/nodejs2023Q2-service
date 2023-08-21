@@ -24,7 +24,7 @@ class Main {
     document.components = components;
     document.security = security;
     document.paths = paths;
-    SwaggerModule.setup('api', app, document);
+    SwaggerModule.setup('doc', app, document);
 
     app.enableCors();
     await app.listen(this.port);

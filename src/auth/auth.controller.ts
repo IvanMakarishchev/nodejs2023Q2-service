@@ -15,11 +15,6 @@ import { RefreshDto } from './dto/refresh.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Get()
-  findAll() {
-    return 'HELLO AUTH';
-  }
-
   @Public()
   @HttpCode(200)
   @Post('login')
