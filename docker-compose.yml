@@ -14,9 +14,9 @@ services:
     ports:
       - ${DB_PORT}:${DB_PORT}
     volumes:
-       - home_service_db_volume:/var/lib/home_serice_db/data
+       - postgres_volume:/var/lib/home_serice_db/data
     networks:
-      - docker_postgres
+      - backend
 
   home_service:
     image: ivanmakaryshchev/home_service
@@ -29,19 +29,18 @@ services:
     environment: 
       PORT: ${PORT}
       DATABASE_URL: ${DATABASE_URL}
-    restart: always
+    restart: on-failure
     volumes:
-            - ./:/app/
-            - home_service_db_volume:/app/node_modules
+            - ./src:/app/src
     depends_on:
       - postgres
     networks:
-      - docker_postgres
+      - backend
 
 volumes:
-  home_service_db_volume:
+  postgres_volume:
 
 networks:
-  docker_postgres:
-    name: postgress_network
+  backend:
+    name: backend_network
     driver: bridge

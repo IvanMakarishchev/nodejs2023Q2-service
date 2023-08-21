@@ -19,6 +19,7 @@ export const dataSourceOptions = (): DataSourceOptions => {
     migrations: [join(__dirname, './migrations/*{.ts,.js}')],
     migrationsTableName: 'migrations',
     synchronize: false,
+    migrationsRun: true,
   };
 };
 
