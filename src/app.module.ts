@@ -8,6 +8,7 @@ import { APP_GUARD, RouterModule, Routes } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { AuthGuard } from './auth/guard/auth.guard';
 import { LogMiddleware } from './common/utils/log.middleware';
+import { AppController } from './app.controller';
 
 const ROUTES: Routes = [{ path: '/auth', module: AuthModule }];
 
@@ -23,7 +24,7 @@ const ROUTES: Routes = [{ path: '/auth', module: AuthModule }];
     PostModule,
     AuthModule,
   ],
-  controllers: [],
+  controllers: [AppController],
   providers: [
     ConfigService,
     JwtService,
